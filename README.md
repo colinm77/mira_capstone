@@ -428,6 +428,8 @@ Then I froze Mira and ran the full 17-test set **three times**. Even at Sampling
 | **Status accuracy** (≥ 0.9, T10 = 1.0) | 0.67 | 1.00 | 1.00 | 1.00 |
 | Judge agreement with human | 59% | 94% | 94% | 100% |
 
+📄 **Quick read:** [final-1](final-v1/final-1.html) · [final-2](final-v1/final-2.html) · [final-3](final-v1/final-3.html): one page per run with each test's input, expected answer, Mira's output, judge scores and reasons, and my final verdict. Download and open in a browser; GitHub shows HTML as code.
+
 #### Results sheet: summary tab
 
 ![Results sheet, summary tab](screenshots/results_summary_tab.png)
@@ -580,7 +582,7 @@ Human approval stays on for every client-facing message in all stages.
 | [final-v1/](final-v1/) | Mira as frozen for the final runs: exports, prompts, code, models, 3 final runs with human review, and the full results sheet (`mira_eval_results.xlsx`) |
 | [prompts/](prompts/) | Every prompt version (judges, Orchestrator, agents), old versions kept |
 | [n8n_code/](n8n_code/) | Code nodes changed after the baseline |
-| [data/](data/) | Ground truth, eval dataset, every run's results (CSV + HTML review pages), summary tab |
+| [data/](data/) | Answer key (`ground_truth.json`), my config, eval dataset, final judge criteria. Every run's results are in the [results xlsx](final-v1/mira_eval_results.xlsx) |
 | [scripts/](scripts/) | `json_to_csv.py` (ground truth → dataset) · `build_review.py` (results → HTML review page) · `extract_workflows.py` (exports → prompts, code, models) |
 | [screenshots/](screenshots/) | Canvases, Mira in action, Slack approval, Langfuse traces |
 

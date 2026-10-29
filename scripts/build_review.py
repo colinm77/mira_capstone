@@ -1,11 +1,11 @@
 """Build a readable review page from an evaluation results CSV.
 
 Usage:
-    python scripts/build_review.py data/baseline-v1.csv
+    python scripts/build_review.py final-v1/final-1.csv
 
-Writes data/<same name>.html : one section per test with the input, expected answer,
+Writes <same folder>/<same name>.html : one section per test with the input, expected answer,
 Mira's output (Markdown rendered, tables included), both judge scores and reasons,
-and the LLM verdict. Open it in a browser for the human review.
+the LLM verdict, and the human verdict and note if the CSV has them. Open it in a browser.
 """
 import csv
 import html
@@ -99,16 +99,30 @@ def main():
     rows = list(csv.DictReader(src.open(encoding="utf-8-sig")))
     sections = []
     summary = []
+    # if the CSV already has the human review, show it; otherwise show where to fill it in
+    has_human = any((r.get("human_verdict") or "").strip() for r in rows)
     for r in rows:
         verdict = (r.get("llm_verdict") or "").strip()
         badge = "pass" if verdict.lower() == "pass" else "fail"
+        human = (r.get("human_verdict") or "").strip()
+        human_badge = "pass" if human.lower() == "pass" else "fail"
+        human_cell = f"<td><span class='{human_badge}'><b>{html.escape(human)}</b></span></td>" if has_human else ""
         summary.append(f"<tr><td><a href='#{html.escape(r.get('id',''))}'>{html.escape(r.get('id',''))}</a></td>"
                        f"<td>{html.escape(r.get('path',''))}</td>"
                        f"<td>{html.escape(r.get('groundedness',''))}</td><td>{html.escape(r.get('correctness',''))}</td>"
-                       f"<td><span class='{badge}'>{html.escape(verdict)}</span></td></tr>")
+                       f"<td><span class='{badge}'>{html.escape(verdict)}</span></td>{human_cell}</tr>")
+        if has_human:
+            note = (r.get("human_note") or "").strip()
+            human_heading = f"<span class='{human_badge}'>Human verdict: {html.escape(human)}</span> "
+            human_block = (f"<h3>Human review (final)</h3><p class='box'><b>Verdict:</b> {html.escape(human)}"
+                           + (f"<br><b>Note:</b> {html.escape(note)}" if note else "") + "</p>")
+        else:
+            human_heading = ""
+            human_block = ("<h3>Human review (fill in the sheet)</h3>"
+                           "<p class='hint'>Expected keywords present? · Hallucination detected? · Human verdict (Pass / Fail) · Note</p>")
         sections.append(f"""
 <section id="{html.escape(r.get('id',''))}">
-  <h2>{html.escape(r.get('id',''))} <span class="{badge}">LLM verdict: {html.escape(verdict)}</span></h2>
+  <h2>{html.escape(r.get('id',''))} {human_heading}<span class="{badge}">LLM verdict: {html.escape(verdict)}</span></h2>
   <p class="meta">Agent: {html.escape(r.get('path',''))} · Groundedness: <b>{html.escape(r.get('groundedness',''))}</b> · Correctness: <b>{html.escape(r.get('correctness',''))}</b></p>
   <h3>Input</h3><p class="box">{html.escape(r.get('input',''))}</p>
   <h3>Expected answer</h3><p class="box">{format_expected(r.get('expected_output',''))}</p>
@@ -119,9 +133,16 @@ def main():
     <li><b>Unsupported claims:</b> {html.escape(r.get('unsupported_claims',''))}</li>
     <li><b>Correctness reason:</b> {html.escape(r.get('correctness_reason',''))}</li>
   </ul>
-  <h3>Human review (fill in the sheet)</h3>
-  <p class="hint">Expected keywords present? · Hallucination detected? · Human verdict (Pass / Fail) · Note</p>
+  {human_block}
 </section>""")
+
+    if has_human:
+        intro = ("LLM verdict = Pass if both judge scores ≥ 0.8. "
+                 "<b>The human verdict is final</b>: I reviewed every output myself and overruled the judge where it was wrong.")
+        human_th = "<th>Human verdict (final)</th>"
+    else:
+        intro = "LLM verdict = Pass if both judge scores ≥ 0.8. The human verdict is recorded in the results sheet."
+        human_th = ""
 
     page = f"""<!doctype html><html><head><meta charset="utf-8"><title>Mira evaluation review — {html.escape(src.stem)}</title>
 <style>
@@ -134,8 +155,8 @@ table{{border-collapse:collapse;margin:8px 0;width:100%}} th,td{{border:1px soli
 .output li{{margin:6px 0}} .meta{{color:#555}} .hint{{color:#777;font-style:italic}} code{{background:#eee;padding:1px 4px;border-radius:3px}}
 </style></head><body>
 <h1>Mira evaluation review — {html.escape(src.stem)}</h1>
-<p>{len(rows)} tests. LLM verdict = Pass if both judge scores ≥ 0.8. The human verdict is recorded in the results sheet.</p>
-<table><thead><tr><th>Test</th><th>Agent</th><th>Groundedness</th><th>Correctness</th><th>LLM verdict</th></tr></thead><tbody>
+<p>{len(rows)} tests. {intro}</p>
+<table><thead><tr><th>Test</th><th>Agent</th><th>Groundedness</th><th>Correctness</th><th>LLM verdict</th>{human_th}</tr></thead><tbody>
 {''.join(summary)}
 </tbody></table>
 {''.join(sections)}
