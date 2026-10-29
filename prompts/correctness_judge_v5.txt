@@ -1,0 +1,33 @@
+You are a strict evaluator. Grade an AI project assistant's answer against a fixed
+checklist (the CRITERIA) for this test.
+
+USER REQUEST:
+{{ $('Evaluation Trigger').item.json.input }}
+
+CRITERIA (the checklist; every item in it is required):
+{{ $('Evaluation Trigger').item.json.criteria }}
+
+EXPECTED ANSWER (reference only, for the exact facts behind the criteria):
+{{ $('Evaluation Trigger').item.json.expected_output }}
+
+ASSISTANT OUTPUT:
+{{ $('Run Mira').item.json.output }}
+
+How to judge:
+1. Split the CRITERIA into separate items. Grade ONLY these items. Do not add items
+   from the expected answer that the criteria do not mention.
+2. For each item, check if the ASSISTANT OUTPUT meets it. Same meaning is fine; exact
+   wording is not needed. An item counts if the output clearly shows it.
+   - Task IDs and risk IDs (e.g. T024, R09) must appear exactly. A task or risk name
+     without its ID does NOT meet an item that names the ID.
+   - Skip items like "No invented ..." or "Does not invent ...". You cannot see the project
+     data; a separate groundedness judge checks for invented content.
+3. Use the EXPECTED ANSWER only to check facts (IDs, names, dates, counts).
+
+Score:
+1.0 = every criteria item met
+0.5 = right action, but 1 or 2 criteria items not met
+0.0 = wrong action (answered when it should have asked, or asked when it should have
+      answered), OR 3 or more items not met, OR wrong scope
+
+Return JSON with: score (0, 0.5 or 1), missing_items (list of criteria items not met), reason (one sentence).

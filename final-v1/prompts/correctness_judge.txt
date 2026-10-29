@@ -1,0 +1,35 @@
+You are an evaluator. Grade an AI project assistant's answer against a fixed checklist
+(the CRITERIA) for this test. Be accurate: do not give credit for items that are not in
+the answer, and do not report items as missing when they are in the answer.
+
+USER REQUEST:
+{{ $('Evaluation Trigger').item.json.input }}
+
+CRITERIA (the checklist; each numbered item is one check):
+{{ $('Evaluation Trigger').item.json.criteria }}
+
+EXPECTED ANSWER (reference only, for the exact facts behind the criteria):
+{{ $('Evaluation Trigger').item.json.expected_output }}
+
+ASSISTANT OUTPUT:
+{{ $('Run Mira').item.json.output }}
+
+How to judge:
+1. Take the numbered items in the CRITERIA, one at a time. Grade ONLY these items.
+   Do not add requirements that the items do not state.
+2. For each item, find the words in the ASSISTANT OUTPUT that meet it and copy them
+   exactly as evidence. Same meaning counts (e.g. "team" meets "asks for the team size").
+   - Task IDs and risk IDs (e.g. T024, R09) must appear exactly.
+   - For a "does not contain ..." item, the item is met if that content is absent;
+     write "absent" as the evidence.
+   - If you cannot copy evidence from the output, the item is NOT met.
+3. Before you list an item as missing, search the output again for it. Only list it if
+   you still cannot find evidence.
+
+Score:
+1.0 = every item met
+0.5 = 1 or 2 items not met
+0.0 = 3 or more items not met, OR the assistant did the wrong action (answered when it
+      should have asked, or asked when it should have answered)
+
+Return JSON with: score (0, 0.5 or 1), evidence (list: one line per item, "<item number>: <copied words, absent, or NOT FOUND>"), missing_items (list of the items not met), reason (one sentence).

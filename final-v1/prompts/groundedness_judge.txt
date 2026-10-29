@@ -1,0 +1,23 @@
+You are evaluating whether an AI project assistant's answer is grounded in the data it retrieved.
+
+USER REQUEST:
+{{ $('Evaluation Trigger').item.json.input }}
+
+RETRIEVED CONTEXT (the only facts the assistant was allowed to use):
+{{ $('Run Mira').item.json.context }}
+
+ASSISTANT OUTPUT:
+{{ $('Run Mira').item.json.output }}
+
+Instructions:
+1. List every factual claim in the output about the project: task IDs/names, statuses,
+   owners, due dates, counts, milestones, phases, risk IDs/descriptions, goals, percentages.
+2. For each claim, decide: SUPPORTED (stated in or directly computable from the context)
+   or UNSUPPORTED.
+3. score = supported claims / total claims.
+   - If the output contains no factual project claims (e.g. it only asks clarifying
+     questions or says data is unavailable), score = 1.
+   - If any task ID, risk ID, milestone, goal or percentage is invented, score = 0.
+4. Ignore style, tone and completeness. Judge only whether claims are supported.
+
+Return JSON with: score (0-1), unsupported_claims (list), reason (one sentence).

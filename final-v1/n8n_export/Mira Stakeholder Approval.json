@@ -1,0 +1,427 @@
+{
+  "name": "Mira Stakeholder Approval",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "draft"
+            },
+            {
+              "name": "source"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1168,
+        0
+      ],
+      "id": "0417f599-760d-4ceb-afec-637e071367be",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES (\"Mira Stakeholder Approval\" workflow)\n// Holds the draft email that is about to go to the PM for approval.\n// It is reached two ways:\n//   - first time: from the trigger (field \"draft\" = the Stakeholder agent's draft)\n//   - after a Decline: from \"Redraft\" (field \"text\" = the new draft)\n// Either way, it passes on one field: draft.\n\n// Step 1: read whatever arrived\nconst incoming = $input.first().json;\n\n// Step 2: pick the draft text\nlet draft = '';\nif (incoming.draft) {\n  draft = incoming.draft;          // first time, from the trigger\n} else if (incoming.text) {\n  draft = incoming.text;           // after a redraft\n} else if (incoming.output) {\n  draft = incoming.output;\n}\n\n// Step 3: pass it on to \"Ask for approval\"\nreturn [{ json: { draft: draft } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        -16
+      ],
+      "id": "0488c213-240b-4bb6-99db-9aeced69ce52",
+      "name": "Current draft"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CC1S0SUCS",
+          "mode": "list",
+          "cachedResultName": "mira-reports",
+          "cachedResultUrl": ""
+        },
+        "message": "=*Stakeholder email draft — approve to send:*\n\n{{ $json.draft }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        -448,
+        -16
+      ],
+      "id": "4414991b-6638-4839-b64c-2a5420afde1d",
+      "name": "Ask for approval",
+      "webhookId": "8f469d74-58a2-4e80-9db3-194ea295518e",
+      "credentials": {
+        "slackApi": {
+          "id": "NhvfpGeFwY94MX3i",
+          "name": "My W5 Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "259c2e59-294c-4545-9c9c-53f6062159ea",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -224,
+        -16
+      ],
+      "id": "4006c96f-00ac-4015-a336-fefea8283aff",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES (\"Mira Stakeholder Approval\" workflow)\n// Runs after the PM clicks Approve. Splits the approved draft into the\n// email subject (the \"Subject:\" line) and the email body (everything after it),\n// ready for the Gmail node.\n\n// Step 1: the approved draft\nconst draft = $('Current draft').first().json.draft || '';\n\n// Step 2: find the \"Subject:\" line\nlet subject = 'Project update';\nconst bodyLines = [];\nlet subjectFound = false;\nfor (const line of draft.split('\\n')) {\n  if (!subjectFound && line.trim().toLowerCase().startsWith('subject:')) {\n    subject = line.trim().slice('subject:'.length).trim();\n    subjectFound = true;\n  } else {\n    bodyLines.push(line);\n  }\n}\n\n// Step 3: send on the subject and body\nreturn [{ json: { subject: subject, body: bodyLines.join('\\n').trim() } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -112
+      ],
+      "id": "b0812a40-0e4b-43ac-9976-9203c97fa6a5",
+      "name": "Split email"
+    },
+    {
+      "parameters": {
+        "sendTo": "pm@example.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "1adeaf6b-3085-4144-8ead-a6982f5c1940",
+      "name": "Send email",
+      "webhookId": "a74a9016-6948-47cb-9bcb-eefb2230c089",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UPhTmV5ZnhyB9Jdd",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CC1S0SUCS",
+          "mode": "list",
+          "cachedResultName": "mira-reports"
+        },
+        "text": "=:white_check_mark: Approved and sent: {{ $('Split email').first().json.subject }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        448,
+        -112
+      ],
+      "id": "47b7f08e-4559-4a8f-8f4a-cdd0e07239f5",
+      "name": "Confirm sent",
+      "webhookId": "f8291342-6d7a-4cfe-86ea-d0811a447d20",
+      "credentials": {
+        "slackApi": {
+          "id": "NhvfpGeFwY94MX3i",
+          "name": "My W5 Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CC1S0SUCS",
+          "mode": "list",
+          "cachedResultName": "mira-reports"
+        },
+        "message": "What should I change in the draft?",
+        "responseType": "freeText",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        0,
+        80
+      ],
+      "id": "464e8b3c-64ec-4eee-ae26-d717b02c94f1",
+      "name": "Ask for changes",
+      "webhookId": "ffe5b444-fec1-466b-a27b-4ae216fe7d7f",
+      "credentials": {
+        "slackApi": {
+          "id": "NhvfpGeFwY94MX3i",
+          "name": "My W5 Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Current draft:\n{{ $('Current draft').first().json.draft }}\n\nPM feedback:\n{{ $json.data.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "ROLE\nYou edit stakeholder email drafts based on the PM's feedback.\n\nINPUT\nThe current draft and the PM's feedback.\n\nOUTPUT\nThe full revised email only, in the same format, starting with the \"Subject:\" line.\nNo explanations before or after it.\n\nRULES\n- Apply only the changes the PM asked for. Keep everything else the same.\n- Do NOT add tasks, task IDs, dates, numbers or facts that are not already in the draft.\n- If the feedback asks for a fact that is not in the draft, write \"[PM to confirm: <what>]\"\n  instead of inventing it.\n\nVAGUE RULE\nIf the feedback is unclear, return the current draft unchanged."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        80
+      ],
+      "id": "4ece0330-4a82-4872-b806-63b50b547f6e",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        240
+      ],
+      "id": "52b8499e-1a76-4a0e-8112-7ef86354de90",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "2dOAylh5mnQkqM26",
+          "name": "My openai key for n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dd576a71-8355-4605-b370-c75ae124bfb6",
+              "leftValue": "={{ $json.draft }} ",
+              "rightValue": "UNKNOWN",
+              "operator": {
+                "type": "string",
+                "operation": "notStartsWith"
+              }
+            },
+            {
+              "id": "c17bd367-6ca6-4996-a484-e3348322ebf6",
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "eval",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -944,
+        0
+      ],
+      "id": "80099c4d-f72c-48ee-8d39-9a530e5d575c",
+      "name": "Real draft"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Real draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Current draft": {
+      "main": [
+        [
+          {
+            "node": "Ask for approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask for approval": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Split email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ask for changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split email": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        [
+          {
+            "node": "Confirm sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask for changes": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Current draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Real draft": {
+      "main": [
+        [
+          {
+            "node": "Current draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "79d768b6-d367-4bb2-9457-0ccefb078f56",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1de781cf41a5685c1889329b735031cf9512ef0986eaa2687a28eaeaa8fde3f9"
+  },
+  "nodeGroups": [],
+  "id": "pXm6Ykj9dO3u8qSp",
+  "tags": []
+}

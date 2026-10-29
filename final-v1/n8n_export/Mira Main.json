@@ -1,0 +1,2025 @@
+{
+  "name": "Mira Main",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -1248,
+        -336
+      ],
+      "id": "025331c5-6be7-4ceb-b8bc-8b4beea30198",
+      "name": "When chat message received",
+      "webhookId": "dde036c5-cd8b-4de7-8ccb-5b06c86158a7"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Normalize request').first().json.message }}",
+        "options": {
+          "systemMessage": "ROLE\nYou are Mira's Planner. You write a draft project plan for the project whose data your tools return.\n\nINPUT\nThe user's request, plus results from your tools:\n- get_description: project scope, goals and approach\n- get_timeline: 8 phases with weeks, dates, activities and milestones\n- get_risks: risk register R01–R10 with linked task signals\nAlways call all three tools before writing.\n\nOUTPUT\nMarkdown, exactly these sections:\n# DRAFT — Project plan: <project name> (PM review required)\n## Overview            (2–3 sentences from the description)\n## Goals               (only goals stated in the description, quoted)\n## Phases              (table: Phase | Weeks | Dates | Key activities | Milestones / deliverables)\n## Key risks           (3–5 bullets: R-ID, risk, mitigation)\n## Open questions      (anything the data does not cover)\n\nRULES\n- Use the 8 phases, dates, activities and milestones exactly as get_timeline returns them.\n- Goals: only the goals in the description. Do not add KPIs or targets.\n- Key risks: prefer risks with a live task signal from get_risks. Cite the R-ID.\n- Use only information from your tools.\n\nVAGUE RULE\nIf something a plan normally has is not in the data (e.g. budget, owners, team size),\nwrite UNKNOWN and list it under Open questions. Do NOT invent goals, KPIs, phases, dates,\nowners or risks. If a tool returns no data, say \"<data> not available\" and do not guess.",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        160,
+        -1088
+      ],
+      "id": "46d73be5-2186-4f69-9862-06a2a98473ae",
+      "name": "Planner",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        -832
+      ],
+      "id": "cfc5b05f-f971-425b-941b-3be664e047fd",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "2dOAylh5mnQkqM26",
+          "name": "My openai key for n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Returns the project description text. Call this first.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_description"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        -848
+      ],
+      "id": "5e2dcece-7ded-4cc9-a8ac-30a7acf4b03d",
+      "name": "get_description"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_timeline"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        -832
+      ],
+      "id": "b298fce5-f1cf-48e2-a3a7-8cc5c0268989",
+      "name": "get_timeline"
+    },
+    {
+      "parameters": {
+        "description": "Returns risks R01–R10 ranked by live task signals.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_risks"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        -848
+      ],
+      "id": "9955cdad-2329-48d7-aee0-98662e3f7b98",
+      "name": "get_risks"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://cloud.langfuse.com/api/public/otel/v1/traces",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payload }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1232,
+        -320
+      ],
+      "id": "2805db2b-d6d8-463d-9183-b9c3c0587943",
+      "name": "Send to Lanfuse",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "3Rntgzac12jaIJmK",
+          "name": "Langfuse"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES\n// Sends Mira's answer back, whichever path produced it (an agent or Clarify).\n// \"Build Langfuse trace\" already worked out the answer.\n// It adds a note at the end when:\n//   - the report was saved as a Google Doc (by \"Save Doc\") -> the Doc link\n//   - a stakeholder draft was sent for approval (by \"Send for approval\", chat runs only)\n// EVAL MODE: the evaluation workflow also needs the tool results (\"context\"),\n// which agent answered (\"path\") and the Orchestrator's intent. They are returned as\n// extra fields; the chat window only shows \"output\".\n\n// Step 1: read the answer and details that \"Build Langfuse trace\" worked out\nconst trace = $('Build Langfuse trace').first().json;\nconst request = $('Normalize request').first().json;\nlet answer = trace.answer;\n\n// Step 2: helper - did this node run in this request?\nfunction nodeRan(nodeName) {\n  try {\n    return $(nodeName).isExecuted;\n  } catch (error) {\n    return false;\n  }\n}\n\n// Step 3: if a Google Doc was saved, add its link\nif (nodeRan('Save Doc')) {\n  const docLink = $('Save Doc').first().json.webViewLink || '';\n  if (docLink !== '') {\n    answer = answer + '\\n\\n---\\n**Saved to Google Doc:** ' + docLink;\n  }\n}\n\n// Step 4: if a stakeholder draft was sent for approval (not in eval mode), say where\nif (nodeRan('Send for approval') && request.source !== 'eval') {\n  answer = answer + '\\n\\n---\\n**Sent to Slack (#mira-reports) for your approval.** It will be emailed only after you click Approve.';\n}\n\n// Step 5: send it back (chat shows \"output\"; the evaluation also reads the other fields)\nreturn [{\n  json: {\n    output: answer,\n    context: trace.context,\n    path: trace.path,\n    intent: $('Orchestrator').first().json.output.intent,\n    test_id: request.test_id\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2368,
+        -432
+      ],
+      "id": "2b24842d-5de2-4cb0-94af-5cfd223a2e30",
+      "name": "Reply to chat"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Normalize request').first().json.message }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "ROLE\nYou are Mira's Orchestrator. You decide which agent should handle a project-management\nrequest, and whether the request has enough information to answer.\n\nINPUT\nOne user message.\n\nACTIVE PROJECT (setting; change per deployment): ABCDE Ltd AI Adoption Project.\nMira already has this project's description, timeline, risk register and task board\n(Sprints 1–10) stored. The user never needs to paste them.\n\nOUTPUT\nJSON only, exactly:\n{\"intent\": \"plan\" | \"risk\" | \"status\" | \"stakeholder\" | \"unclear\",\n \"sufficient\": true | false,\n \"missing\": [\"<what is missing>\", ...],\n \"save_to_doc\": true | false}\n\nRULES\n- plan: create a project plan, phases, schedule.\n- risk: risks, risk matrix, top risks, mitigations, mitigation coverage.\n- status: status report, progress, task counts, blocked/overdue/at-risk tasks, upcoming milestones.\n- stakeholder: an email or update for stakeholders or an audience.\n- If the request names the active project, sufficient = true.\n- Phrases like \"the provided project description\", \"the task board\", \"the risk data\",\n  \"the timeline\" or \"Sprint N\" refer to the stored data, so sufficient = true.\n- sufficient = true for a new project only if it gives enough detail:\n  plan → scope/goals plus timeline, deliverables or team; risk → domain and scope;\n  status → task data.\n- If sufficient = true, missing = [].\n- save_to_doc = true only for a full project plan, a full risk assessment, or a weekly\n  status report. Short questions (top risks, task counts, blocked tasks, milestones,\n  stakeholder emails) and any request with sufficient = false → save_to_doc = false.\n\nVAGUE RULE\nIf you are unsure which intent fits, use \"unclear\". If you are unsure the request has\nenough information, set sufficient = false and list what is missing (e.g. \"scope\",\n\"timeline\", \"team size\", \"goals\", \"deliverables\", \"task data\"). Never assume details\nthe user did not give.\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -800,
+        -336
+      ],
+      "id": "98e9b037-3177-4545-a6f8-e84ecff3966c",
+      "name": "Orchestrator",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -768,
+        -80
+      ],
+      "id": "d8f8d1e0-da1d-45a4-92c2-fba6c7021743",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "2dOAylh5mnQkqM26",
+          "name": "My openai key for n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{ \"intent\": \"plan\", \"sufficient\": true, \"missing\": [\"scope\"], \"save_to_doc\": true }"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -608,
+        -80
+      ],
+      "id": "0aa16b64-8f71-47bf-b225-33595e8d6cce",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "44e9598a-b549-460d-a691-eafcec28b983",
+              "leftValue": "={{ $json.output.sufficient === true || $('Normalize request').first().json.message.toLowerCase().includes('abcde') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a3b2f038-4afa-4085-a416-0363cb2e07b5",
+              "leftValue": "={{ $json.output.intent }}",
+              "rightValue": "unclear",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -528,
+        -336
+      ],
+      "id": "3505d64d-7e89-4a81-96d3-67e199545025",
+      "name": "Enough data?"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.intent }}",
+                    "rightValue": "plan",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "6ea9fade-0f1e-4e30-9357-a9433b795244"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "plan"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2566a356-1439-4d60-9dca-19eaf8f89aa8",
+                    "leftValue": "={{ $json.output.intent }}",
+                    "rightValue": "risk",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "risk"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a3252894-8ef9-4e72-82e0-ecf6939640a2",
+                    "leftValue": "={{ $json.output.intent }}",
+                    "rightValue": "status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "status"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "117f63a6-cd9d-47bc-98b3-bd86e99f83e7",
+                    "leftValue": "={{ $json.output.intent }}",
+                    "rightValue": "stakeholder",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "stakeholder"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -352,
+        -336
+      ],
+      "id": "1dad1265-d9b0-4796-b1c8-58c4507f7533",
+      "name": "Which Agent?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES (v2, CHG-12)\n// Runs when the Orchestrator decides there isn't enough information.\n// Instead of guessing, Mira asks the user for what is missing.\n//   - If the Orchestrator couldn't tell what kind of request it was (\"unclear\"),\n//     Mira asks which kind of output the user wants.\n//   - Otherwise Mira asks for a FIXED list of details for that kind of request.\n// v1 used the Orchestrator's own \"missing\" list, which changed from run to run.\n// The list is now set here in code, so it is the same every time.\n\n// Step 1: read the Orchestrator's decision and the user's message\nconst decision = $('Orchestrator').first().json.output;\nconst request = $('Normalize request').first().json.message.toLowerCase();\n\n// Step 2: the fixed list of details to ask for, per kind of request\nconst fixedLists = {\n  plan: ['scope', 'goals', 'timeline', 'deliverables', 'team size'],\n  risk: ['domain', 'scope', 'goals', 'timeline', 'team/technology'],\n  status: ['task data'],\n  stakeholder: ['the audience', 'the topic or period to cover']\n};\n\nlet missingItems = fixedLists[decision.intent] || [];\n\n// Step 3: if the user already gave a duration (e.g. \"a 2-week project\"),\n// don't ask for the timeline again\nconst givesDuration = request.includes('week') || request.includes('month') || request.includes('day');\nif (givesDuration) {\n  const withoutTimeline = [];\n  for (const item of missingItems) {\n    if (item !== 'timeline') {\n      withoutTimeline.push(item);\n    }\n  }\n  missingItems = withoutTimeline;\n}\n\n// Step 4: choose the message\nlet message = '';\nif (decision.intent === 'unclear' || missingItems.length === 0) {\n  message = \"I'm not sure what you need. Do you want a project plan, a risk assessment, a status report, or a stakeholder update?\";\n} else {\n  message = \"I don't have enough information to do that yet. Please tell me: \" + missingItems.join(', ') + '.';\n}\n\n// Step 5: send the message back to the chat\nreturn [{ json: { output: message } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        -592
+      ],
+      "id": "1953c6bf-b121-4ea6-8ef8-57b303f04ac0",
+      "name": "Clarify"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Normalize request').first().json.message }}",
+        "options": {
+          "systemMessage": "ROLE\nYou are Mira's Risk agent. You assess risks for the project whose data your tools return.\n\nINPUT\nThe user's request, plus results from your tools:\n- get_description: project scope and context\n- get_risks: risk register R01–R10 (category, risk, impact, mitigation, mitigation tasks,\n  link strength, coverage status, tier, rank)\n- get_overdue_or_blocked: blocked, overdue and due-soon tasks as of the project's as-of date\nAlways call get_risks before answering, for every question.\n\nOUTPUT\nMarkdown.\nFor a risk assessment:\n## Risk matrix\n(table: Risk ID | Category | Risk | Impact | Mitigation | Live signal | Tier)\n## Summary          (2–3 sentences)\nFor a \"top N risks\" question:\nA numbered list of N risks: R-ID, risk, why it ranks here (its tier and live signal,\ne.g. \"Tier 1: T024 Security review of AI infrastructure is Blocked\"), impact, mitigation.\nEvery risk in the list MUST show its impact and its mitigation from get_risks.\nFor a mitigation coverage question (which risks have mitigation tasks):\n(table: Risk ID | Risk | Mitigation tasks | Link strength | Coverage status), one row\nfor each of R01–R10, then a short summary grouped by coverage status.\n\nRULES\n- Use only risks R01–R10 from get_risks.\n- Live signal = a linked task that is Blocked, overdue or due soon (from get_overdue_or_blocked).\n- Always cite tasks by ID and name, with the signal, e.g. \"T024 Security review of AI\n  infrastructure (Blocked)\". Never a task name without its ID.\n- Tier, rank, link strength and coverage status are calculated by get_risks. Copy them\n  exactly as returned. Never rank risks or decide coverage yourself.\n  (For reference: Tier 1 = linked to a Blocked or overdue task; Tier 2 = linked to an\n  In Progress task due soon; Tier 3 = no signal.)\n- Relate each risk to the project context (forecasting, routing, inventory, customer support)\n  where the description supports it.\n- If asked for something the register does not have (e.g. a likelihood or severity score),\n  say the register has no such field and give what it does have for that risk. Do not say\n  \"no project data\".\n\nVAGUE RULE\nIf a risk has no live signal, write \"none\". Do NOT invent new risks, risk IDs, likelihoods,\nscores or percentages. If the request is about a project with no data, say \"UNKNOWN —\nno project data available\" and ask for the project details.\n",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        -656
+      ],
+      "id": "968706fd-277a-4ac3-8745-1b5e2d4dafea",
+      "name": "Risk",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-2024-11-20",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-2024-11-20"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        -416
+      ],
+      "id": "ce5b1027-a634-45fb-a24c-57b7d867224f",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "2dOAylh5mnQkqM26",
+          "name": "My openai key for n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Returns the project description text. Call this first.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_description"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        -432
+      ],
+      "id": "1b185713-f103-4842-a431-05d59862c781",
+      "name": "get_description1"
+    },
+    {
+      "parameters": {
+        "description": "Returns risks R01–R10 ranked by live task signals.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_risks"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        -432
+      ],
+      "id": "c17c43fd-a2b1-4c7b-8e21-af1b5fddf114",
+      "name": "get_risks1"
+    },
+    {
+      "parameters": {
+        "description": "Returns blocked, overdue and due-soon tasks with reasons.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_overdue_or_blocked"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        -432
+      ],
+      "id": "c16a7c7c-dda3-430a-87e2-cecd6398fffa",
+      "name": "get_overdue_or_blocked"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES\n// Builds one Langfuse trace for a Mira request, for WHICHEVER path ran:\n// an agent (Planner, Risk, Status, Stakeholder) or Clarify (vague request).\n// The trace reads top to bottom, in the order things happened:\n//   mira (the whole request)\n//     1. Orchestrator   - the routing decision (runs on every request)\n//     2. Agent          - the agent's model call (skipped for Clarify)\n//          - tool calls  - one entry per tool, shown UNDER the agent that called it\n// Token counts are ESTIMATED from text length (PRD §5.2); Langfuse turns them into cost.\n// Calibrated on T1: agent estimate 3,108 tokens vs n8n's own count 3,098.\n// Timing: n8n doesn't give us real step times here, so each step gets its own\n// time slot inside a 1-second window. This keeps the steps in the right order in Langfuse.\n\n// Step 1: settings\nconst modelName = 'gpt-4o-mini';\nconst agentNames = ['Planner', 'Risk', 'Status', 'Stakeholder'];\nconst orchestratorPromptTokens = 600; // Orchestrator system prompt, sent on every request\nconst systemPromptTokens = 300;       // agent system prompt + tool definitions, sent on every model call\nconst tokensPerToolCall = 20;         // tokens the model writes to ask for one tool\nconst charsPerTokenIn = 4;            // input text: about 4 characters per token\nconst charsPerTokenOut = 4.5;         // Markdown answers: about 4.5 characters per token\n\n// Step 2: helpers\nfunction asText(value) {\n  if (typeof value === 'string') {\n    return value;\n  }\n  return JSON.stringify(value || '');\n}\nfunction inputTokens(text) {\n  return Math.ceil(String(text || '').length / charsPerTokenIn);\n}\nfunction outputTokens(text) {\n  return Math.ceil(String(text || '').length / charsPerTokenOut);\n}\nfunction nodeRan(nodeName) {\n  // True if this node ran in this request. A node that doesn't exist yet counts as \"didn't run\".\n  try {\n    return $(nodeName).isExecuted;\n  } catch (error) {\n    return false;\n  }\n}\n\n// Step 3: get the request (from \"Normalize request\": chat or schedule) and the Orchestrator's decision\nconst request = $('Normalize request').first().json;\nconst userMessage = request.message || '';\nconst sessionId = request.session_id || 'no-session';\nconst source = request.source || 'chat';\nconst testId = request.test_id || '';\nconst decision = $('Orchestrator').first().json.output;\n\n// Step 4: find which path ran and get its answer\nlet pathName = 'Clarify';\nlet answer = '';\nlet toolCalls = [];\nfor (const name of agentNames) {\n  if (nodeRan(name)) {\n    pathName = name;\n    break;\n  }\n}\nif (pathName === 'Clarify') {\n  answer = $('Clarify').first().json.output || '';\n} else {\n  const agentResult = $(pathName).first().json;\n  answer = agentResult.output || '';\n  toolCalls = agentResult.intermediateSteps || [];\n}\n\n// Step 5: estimate the tokens\n// 5a. Orchestrator: one model call (its prompt + the message in, a small JSON decision out)\nconst orchestratorIn = orchestratorPromptTokens + inputTokens(userMessage);\nconst orchestratorOut = outputTokens(JSON.stringify(decision));\n\n// 5b. Agent: 2 model calls when it uses tools (ask for tools, then write the answer), else 1\nlet agentModelCalls = 0;\nlet agentIn = 0;\nlet agentOut = 0;\nif (pathName !== 'Clarify') {\n  agentModelCalls = 1;\n  if (toolCalls.length > 0) {\n    agentModelCalls = 2;\n  }\n  let toolResultTokens = 0;\n  for (const call of toolCalls) {\n    toolResultTokens = toolResultTokens + inputTokens(asText(call.observation));\n  }\n  agentIn = agentModelCalls * (systemPromptTokens + inputTokens(userMessage)) + toolResultTokens;\n  agentOut = outputTokens(answer) + toolCalls.length * tokensPerToolCall;\n}\n\n// Step 6: helpers for the OpenTelemetry format\nfunction randomHex(length) {\n  let result = '';\n  for (let i = 0; i < length; i++) {\n    result = result + Math.floor(Math.random() * 16).toString(16);\n  }\n  return result;\n}\nfunction textField(key, value) {\n  return { key: key, value: { stringValue: String(value) } };\n}\nfunction numberField(key, value) {\n  return { key: key, value: { intValue: Number(value) } };\n}\n\n// Time slots: the trace covers the last 1 second (1000 ms).\n//   Orchestrator: 0–200 ms\n//   Agent:        200–1000 ms, with its tool calls one after another inside 250–750 ms\nconst windowStart = (BigInt(Date.now()) - 1000n) * 1000000n;   // 1 second ago, in nanoseconds\nfunction timeAt(milliseconds) {\n  return (windowStart + BigInt(Math.round(milliseconds)) * 1000000n).toString();\n}\n\nconst traceId = randomHex(32);\nconst rootSpanId = randomHex(16);\nconst agentSpanId = randomHex(16);\n\n// Step 7: build the trace pieces (\"spans\")\nconst spans = [];\n\n// 7a. The whole request (0–1000 ms)\nspans.push({\n  traceId: traceId, spanId: rootSpanId, name: 'mira', kind: 1,\n  startTimeUnixNano: timeAt(0), endTimeUnixNano: timeAt(1000),\n  attributes: [\n    textField('langfuse.trace.name', 'mira'),\n    textField('langfuse.trace.input', userMessage),\n    textField('langfuse.trace.output', answer),\n    textField('langfuse.session.id', sessionId),\n    textField('langfuse.trace.metadata.intent', decision.intent),\n    textField('langfuse.trace.metadata.sufficient', decision.sufficient),\n    textField('langfuse.trace.metadata.path', pathName),\n    textField('langfuse.trace.metadata.source', source),\n    textField('langfuse.trace.metadata.test_id', testId),\n    { key: 'langfuse.trace.tags', value: { arrayValue: { values: [\n      { stringValue: 'mira' },\n      { stringValue: pathName.toLowerCase() },\n      { stringValue: source },\n      { stringValue: testId || 'no-test' }\n    ] } } }\n  ]\n});\n\n// 7b. Step 1 of the request: the Orchestrator's model call (0–200 ms)\nspans.push({\n  traceId: traceId, spanId: randomHex(16), parentSpanId: rootSpanId, name: 'Orchestrator', kind: 1,\n  startTimeUnixNano: timeAt(0), endTimeUnixNano: timeAt(200),\n  attributes: [\n    textField('langfuse.observation.type', 'generation'),\n    textField('gen_ai.request.model', modelName),\n    textField('langfuse.observation.input', userMessage),\n    textField('langfuse.observation.output', JSON.stringify(decision)),\n    numberField('gen_ai.usage.input_tokens', orchestratorIn),\n    numberField('gen_ai.usage.output_tokens', orchestratorOut),\n    textField('langfuse.observation.metadata.token_counts', 'estimated from text length')\n  ]\n});\n\n// 7c. Step 2 of the request: the agent's model call (200–1000 ms; skipped for Clarify)\nif (pathName !== 'Clarify') {\n  spans.push({\n    traceId: traceId, spanId: agentSpanId, parentSpanId: rootSpanId, name: pathName, kind: 1,\n    startTimeUnixNano: timeAt(200), endTimeUnixNano: timeAt(1000),\n    attributes: [\n      textField('langfuse.observation.type', 'generation'),\n      textField('gen_ai.request.model', modelName),\n      textField('langfuse.observation.input', userMessage),\n      textField('langfuse.observation.output', answer),\n      numberField('gen_ai.usage.input_tokens', agentIn),\n      numberField('gen_ai.usage.output_tokens', agentOut),\n      textField('langfuse.observation.metadata.token_counts', 'estimated from text length'),\n      numberField('langfuse.observation.metadata.model_calls', agentModelCalls)\n    ]\n  });\n\n  // 7d. The agent's tool calls, shown under the agent, one after another (250–750 ms)\n  let slotLength = 500;\n  if (toolCalls.length > 0) {\n    slotLength = 500 / toolCalls.length;\n  }\n  let slotStart = 250;\n  for (const call of toolCalls) {\n    let toolName = 'tool';\n    let toolInput = '';\n    if (call.action) {\n      toolName = call.action.tool || 'tool';\n      toolInput = asText(call.action.toolInput);\n    }\n    spans.push({\n      traceId: traceId, spanId: randomHex(16), parentSpanId: agentSpanId, name: toolName, kind: 1,\n      startTimeUnixNano: timeAt(slotStart), endTimeUnixNano: timeAt(slotStart + slotLength - 10),\n      attributes: [\n        textField('langfuse.observation.type', 'span'),\n        textField('langfuse.observation.input', toolInput),\n        textField('langfuse.observation.output', asText(call.observation).slice(0, 5000))\n      ]\n    });\n    slotStart = slotStart + slotLength;\n  }\n}\n\n// Step 8: the tool results as one text block (\"context\"). The evaluation's Groundedness\n// judge checks Mira's answer against exactly this: what the tools returned.\nlet context = '';\nfor (const call of toolCalls) {\n  let toolName = 'tool';\n  if (call.action) {\n    toolName = call.action.tool || 'tool';\n  }\n  context = context + '[' + toolName + ']\\n' + asText(call.observation) + '\\n\\n';\n}\nif (context === '') {\n  context = 'No tools were called.';\n}\n\n// Step 9: wrap everything in the OpenTelemetry envelope and send it on\nconst payload = {\n  resourceSpans: [{\n    resource: { attributes: [textField('service.name', 'mira')] },\n    scopeSpans: [{ scope: { name: 'n8n' }, spans: spans }]\n  }]\n};\n\nreturn [{\n  json: {\n    path: pathName,\n    answer: answer,\n    context: context,\n    estimate: {\n      orchestratorTokens: orchestratorIn + orchestratorOut,\n      agentTokens: agentIn + agentOut,\n      total: orchestratorIn + orchestratorOut + agentIn + agentOut\n    },\n    payload: payload\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -320
+      ],
+      "id": "3bb6d886-600c-45ec-a455-48c73edd3bda",
+      "name": "Build Langfuse trace"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Normalize request').first().json.message }}",
+        "options": {
+          "systemMessage": "ROLE\nYou are Mira's Status agent. You report on project progress from the task board and timeline\nthat your tools return.\n\nINPUT\nThe user's request, plus results from your tools:\n- get_tasks: task rows plus exact counts by status (filter by sprint and/or status)\n- get_overdue_or_blocked: blocked, overdue and due-soon tasks as of the project's as-of date\n- get_upcoming_milestones: timeline milestones due in the next milestone window\nWhich tools to call:\n- Weekly status report → all three tools.\n- Blocked / at-risk / overdue question → get_overdue_or_blocked (and get_tasks if needed).\nAlways call get_overdue_or_blocked WITHOUT a sprint filter, so it returns blocked and\noverdue tasks from every sprint.\n- Task counts → get_tasks.\nUse the as_of date returned by the tools. Never use today's date.\nChoosing the sprint filter for get_tasks:\n- The user names a sprint (e.g. \"Sprint 3\") → that sprint.\n- A weekly status report that names no sprint → sprint = \"current\".\n- Anything else (project status, task counts, \"the current project\") → leave sprint\n  EMPTY, so get_tasks returns the whole board. \"Current project\" does not mean\n  \"current sprint\".\n\nOUTPUT\nMarkdown. Use ONLY the one format that matches the request. Never add the other formats.\n- Weekly status report:\n  # Status report — <sprint>, as of <as_of from tools>\n  ## Health: <Green|Amber|Red> — <reason>\n  ## Counts\n  ## Completed  ## In progress  ## To do   (each: bullets \"T0XX <task name> — <owner>, due <date>\")\n  ## Blocked  ## Overdue / at risk          (from get_overdue_or_blocked, any sprint)\n  ## Upcoming milestones  ## Asks / decisions\n- Status summary: exactly these five lines, even if the user asks about fewer:\n  Done: <n>\n  In Progress: <n>\n  Blocked: <n>\n  To Do: <n>\n  Total: <n>\n  No task list unless the user asks for one.\n- At-risk / milestone question: table: Item | Due | Status | Reason | Suggested action | Owner.\n\nRULES\n- Every number comes from the counts in get_tasks. Never count yourself.\n- Every date judgement (overdue, due soon, upcoming) comes from the tools.\n- Use actual task IDs and names (e.g. \"T024 Security review of AI infrastructure\").\n- Every task that get_overdue_or_blocked returns as Blocked or overdue MUST appear in the\n  weekly report's Blocked or Overdue / at risk section, whatever its sprint (e.g. a\n  Blocked task in a later sprint is still listed). Before finishing, check that none\n  is missing.\n- Every flagged task gets a reason (e.g. \"overdue by 7 days\", \"due today, still In\n  Progress\", \"due in 4 days, not started\") and a suggested action.\n- Health: Red if a Blocked task is in the current or next sprint; Amber if any task is\n  overdue; otherwise Green. State the reason with task IDs.\n\nVAGUE RULE\nIf get_tasks returns no tasks for the requested sprint, STOP: do not write a report. Reply\n\"No tasks found for <sprint> on the task board\" and ask which sprint the user meant.\nDo not fill the gap with tasks from other sprints.\nIf the tools return no task data at all, say \"No task data available\" and ask for the task board.\nDo NOT invent tasks, statuses, owners, dates or progress percentages. If a field is empty,\nwrite UNKNOWN.\n",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        -272
+      ],
+      "id": "36b3103e-689a-4012-85f3-4072333e9628",
+      "name": "Status",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-2024-11-20",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-2024-11-20"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        -112
+      ],
+      "id": "8034cf0e-5d6d-4bac-a42e-7a84f2adaef5",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "2dOAylh5mnQkqM26",
+          "name": "My openai key for n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Sprint to filter by, e.g. \"Sprint 3\" or \"3\". Use \"current\" for the current sprint. Empty = all sprints.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_tasks",
+            "sprint": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('sprint', `Sprint to filter by, e.g. \"Sprint 3\" or \"3\". Empty = all sprints.`, 'string') }}",
+            "status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('status', `Status to filter by: Done, In Progress, Blocked or To Do. Empty = all statuses.`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        -80
+      ],
+      "id": "37afa603-a026-4177-9b9f-cfc9593aa90f",
+      "name": "get_tasks"
+    },
+    {
+      "parameters": {
+        "description": "Returns timeline milestones due in the next 2 weeks.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_upcoming_milestones"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        -112
+      ],
+      "id": "9195cba2-d554-4cd4-8b30-d305aed05b05",
+      "name": "get_upcoming_milestones"
+    },
+    {
+      "parameters": {
+        "description": "Returns blocked, overdue and due-soon tasks with reasons.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_overdue_or_blocked"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        -64
+      ],
+      "id": "234a4ca2-7a82-4e7d-9c3c-19237aa95d75",
+      "name": "get_overdue_or_blocked1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES\n// Gets the report ready to save as a Google Doc: a title and the text.\n// The title says what kind of report it is and when it was made.\n\n// Step 1: which agent answered, and its answer (worked out by \"Build Langfuse trace\")\nconst trace = $('Build Langfuse trace').first().json;\nconst agentName = trace.path;\nconst reportText = trace.answer;\n\n// Step 2: pick the report type from the agent\nlet reportType = 'Report';\nif (agentName === 'Planner') {\n  reportType = 'Project plan (DRAFT)';\n} else if (agentName === 'Risk') {\n  reportType = 'Risk assessment';\n} else if (agentName === 'Status') {\n  reportType = 'Weekly status report';\n}\n\n// Step 3: the date and time it was made, e.g. \"2026-10-25 14:03\"\nconst madeAt = new Date().toISOString().slice(0, 16).replace('T', ' ');\n\n// Step 4: send on the title and text\nreturn [{\n  json: {\n    title: 'Mira — ' + reportType + ' — ' + madeAt,\n    text: reportText\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        -592
+      ],
+      "id": "80a41178-6670-4d0c-9a69-9fd46c726916",
+      "name": "Prepare doc"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "EMBUiNmzlR4trfgq",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/EMBUiNmzlR4trfgq",
+          "cachedResultName": "Mira Save Doc"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "markdown": "={{ $json.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "markdown",
+              "displayName": "markdown",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        2176,
+        -592
+      ],
+      "id": "43ad0d97-5570-40ba-9008-9839a32f886a",
+      "name": "Save Doc"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES\n// Mira main has three ways in:\n//   - the chat (a person asks)                       -> source \"chat\"\n//   - the Monday schedule                            -> source \"schedule\"\n//   - the evaluation workflow (runs the 13 tests)    -> source \"eval\"\n// This node gives all three the same shape, so every node after it works the same way:\n//   message    = the request text\n//   session_id = groups messages in Langfuse\n//   source     = \"chat\", \"schedule\" or \"eval\" (decides how the answer is delivered)\n//   test_id    = the test number (eval runs only, e.g. \"T5\"), shown in Langfuse\n// All later nodes read the request from HERE, never from a trigger.\n\n// Step 1: the request the schedule sends every Monday.\n// \"the task board\" tells the Orchestrator the request is about the stored project data;\n// the Status agent then uses current_sprint from mira_config.json.\nconst scheduledMessage = 'Generate the weekly status report for the current sprint using the task board.';\n\n// Step 2: helper - did this trigger start this run?\nfunction triggerRan(nodeName) {\n  try {\n    return $(nodeName).isExecuted;\n  } catch (error) {\n    return false;\n  }\n}\n\n// Step 3: build the request\nlet message = '';\nlet sessionId = '';\nlet source = '';\nlet testId = '';\n\nif (triggerRan('When chat message received')) {\n  const chat = $('When chat message received').first().json;\n  message = chat.chatInput || '';\n  sessionId = chat.sessionId || 'no-session';\n  source = 'chat';\n} else if (triggerRan('When Executed by Another Workflow')) {\n  const evalRequest = $('When Executed by Another Workflow').first().json;\n  message = evalRequest.message || '';\n  testId = evalRequest.test_id || '';\n  sessionId = 'eval-' + new Date().toISOString().slice(0, 10);\n  source = 'eval';\n} else {\n  message = scheduledMessage;\n  sessionId = 'schedule-' + new Date().toISOString().slice(0, 10);\n  source = 'schedule';\n}\n\n// Step 4: pass it on to the Orchestrator\nreturn [{ json: { message: message, session_id: sessionId, source: source, test_id: testId } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        -336
+      ],
+      "id": "574d4b4c-2529-4c2e-9fc5-e11365f31ca1",
+      "name": "Normalize request"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1232,
+        -608
+      ],
+      "id": "fe43dfd8-0513-4f8e-916f-b745b2e3b138",
+      "name": "Every Monday 9am"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES\n// For the scheduled Monday report only: builds a short Slack message with\n// the report's title line, its Health line, and the link to the Google Doc.\n\n// Step 1: the report text and the Doc link\nconst report = $('Build Langfuse trace').first().json.answer || '';\nlet docLink = '';\ntry {\n  if ($('Save Doc (schedule)').isExecuted) {\n    docLink = $('Save Doc (schedule)').first().json.webViewLink || '';\n  }\n} catch (error) {\n  docLink = '';\n}\n\n// Step 2: pick out the title line and the Health line from the report\nlet titleLine = 'Weekly status report';\nlet healthLine = '';\nfor (const rawLine of report.split('\\n')) {\n  const line = rawLine.replace(/#/g, '').trim();\n  if (line === '') {\n    continue;\n  }\n  if (titleLine === 'Weekly status report' && line.toLowerCase().startsWith('status report')) {\n    titleLine = line;\n  }\n  if (healthLine === '' && line.toLowerCase().startsWith('health')) {\n    healthLine = line;\n  }\n}\n\n// Step 3: build the message\nlet text = ':bar_chart: *' + titleLine + '*\\n';\nif (healthLine !== '') {\n  text = text + healthLine + '\\n';\n}\nif (docLink !== '') {\n  text = text + 'Full report: ' + docLink;\n} else {\n  text = text + '(The Google Doc could not be saved. See the n8n execution.)';\n}\n\n// Step 4: send it on to the Slack node\nreturn [{ json: { text: text } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2224,
+        -96
+      ],
+      "id": "5f56d7ef-1ba1-4df3-9711-4924ba2dbb5b",
+      "name": "Build Slack message"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CC1S0SUCS",
+          "mode": "list",
+          "cachedResultName": "mira-reports"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        2384,
+        -96
+      ],
+      "id": "490ac769-3ed9-4a39-9ace-de5c59bab71d",
+      "name": "Post to Slack",
+      "webhookId": "f9ef8bf6-593e-4363-bfb3-e74608874f80",
+      "credentials": {
+        "slackApi": {
+          "id": "NhvfpGeFwY94MX3i",
+          "name": "My W5 Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        240
+      ],
+      "id": "e2c5bf27-d002-48c6-83dd-8e33c2a5401f",
+      "name": "OpenAI Chat Model4",
+      "credentials": {
+        "openAiApi": {
+          "id": "2dOAylh5mnQkqM26",
+          "name": "My openai key for n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Sprint to filter by, e.g. \"Sprint 3\" or \"3\". Use \"current\" for the current sprint. Empty = all sprints.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_tasks",
+            "sprint": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('sprint', `Sprint to filter by, e.g. \"Sprint 3\" or \"3\". Empty = all sprints.`, 'string') }}",
+            "status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('status', `Status to filter by: Done, In Progress, Blocked or To Do. Empty = all statuses.`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        304,
+        304
+      ],
+      "id": "a37cecf9-933a-47a3-8ab1-d267c4cd3115",
+      "name": "get_tasks1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Normalize request').first().json.message }}",
+        "options": {
+          "systemMessage": "ROLE\nYou are Mira's Stakeholder agent. You draft a professional update email about one sprint\nof the project whose data your tools return.\n\nINPUT\nThe user's request (sprint and, if given, audience), plus results from your tools:\n- get_tasks: you MUST call it with the sprint filter, e.g. sprint = \"Sprint 2\"\n- get_overdue_or_blocked: you MUST call it (no sprint filter). It lists every Blocked\n  and overdue task with the number of days overdue. Use it ONLY to check the tasks of\n  the requested sprint.\n\nOUTPUT\nPlain-text email, exactly:\nSubject: <project> — <sprint> update\nHi <audience, or \"team\">,\n<2–3 sentence summary; if a task of this sprint is overdue or Blocked, say so here>\nCompleted:    <bullets: task ID + name>\nIn progress:  <bullets: task ID + name + due date; if overdue, add \"OVERDUE by N days\">\nRisks / asks: <bullets: every overdue or Blocked task of this sprint, with its reason; or \"None\">\nNext steps:   <bullets: only how open tasks from this sprint will be closed. For each\n               overdue or Blocked task give a plan to close it: who (the assignee), what\n               they will do, and that a new due date is needed>\nBest regards,\n<PM name, or \"[PM name]\">\n\nRULES\n- Only tasks from the requested sprint. Never mention tasks from other sprints, even if\n  get_overdue_or_blocked returns them.\n- A task of this sprint that appears in the \"overdue\" list of get_overdue_or_blocked\n  MUST be called overdue in the In progress bullet, in Risks / asks and in Next steps.\n  Never write \"Risks / asks: None\" when a task of this sprint is overdue or Blocked.\n- Tone: professional; for leadership keep it short and outcome-focused; for engineering\n  include task detail.\n\nVAGUE RULE\nIf no sprint is named, do not draft. Reply \"UNKNOWN sprint — which sprint should this\nupdate cover? Please resend your request with the sprint, e.g. 'Draft a stakeholder update\nemail for Sprint 2.'\" Do NOT invent tasks, dates, names or next steps that are not in the data.\nUse \"[PM name]\" rather than guessing a name.",
+          "returnIntermediateSteps": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        96
+      ],
+      "id": "a8d64f3c-9c05-45c5-a8ab-7966b095968d",
+      "name": "Stakeholder",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "pXm6Ykj9dO3u8qSp",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/pXm6Ykj9dO3u8qSp",
+          "cachedResultName": "Mira Stakeholder Approval"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "draft": "={{ $('Stakeholder').first().json.output }}",
+            "source": "={{ $('Normalize request').first().json.source }}"
+          },
+          "matchingColumns": [
+            "draft"
+          ],
+          "schema": [
+            {
+              "id": "draft",
+              "displayName": "draft",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        768,
+        64
+      ],
+      "id": "54428516-12c6-41e8-972a-e3f9275a32d2",
+      "name": "Send for approval"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES\n// Decides how Mira's answer is delivered. It picks exactly ONE lane:\n//   schedule  = the Monday trigger started this run -> save a Doc and post to Slack\n//   doc       = a full plan, risk assessment or weekly report (Orchestrator save_to_doc = true)\n//               -> save a Doc and reply in chat with the link\n//   chat_only = everything else (short answers, Clarify, stakeholder drafts) -> reply in chat\n// EVAL MODE: when the evaluation workflow runs a test (source = \"eval\"), the answer\n// is always \"chat_only\", so 13 test runs don't create Docs or Slack posts.\n// The \"Delivery\" Switch after this node routes on the field \"lane\".\n\n// Step 1: where the request came from, what the Orchestrator decided, and which path answered\nconst source = $('Normalize request').first().json.source;\nconst decision = $('Orchestrator').first().json.output;\nconst path = $('Build Langfuse trace').first().json.path;\n\n// Step 2: pick the lane\nlet lane = 'chat_only';\nif (source === 'eval') {\n  lane = 'chat_only';\n} else if (source === 'schedule') {\n  lane = 'schedule';\n} else if (decision.save_to_doc === true && path !== 'Clarify') {\n  lane = 'doc';\n}\n\n// Step 3: pass the lane on to the Switch\nreturn [{ json: { lane: lane } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        -320
+      ],
+      "id": "caaa6f1c-ac53-4972-9da3-263a414ed409",
+      "name": "Decide delivery"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.lane }}",
+                    "rightValue": "doc",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "550999ec-ab26-4f89-94f1-68a313c46200"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "doc"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bc4a7793-e6e6-4e65-9a81-b0382a2cb943",
+                    "leftValue": "={{ $json.lane }}",
+                    "rightValue": "chat_only",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "chat_only"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8f14e280-0198-4d17-92c8-737a1761686e",
+                    "leftValue": "={{ $json.lane }}",
+                    "rightValue": "schedule",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "schedule"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1568,
+        -336
+      ],
+      "id": "af7d0bb6-0890-41e6-9209-7c14e3f32f8d",
+      "name": "Delivery"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES\n// Gets the report ready to save as a Google Doc: a title and the text.\n// The title says what kind of report it is and when it was made.\n\n// Step 1: which agent answered, and its answer (worked out by \"Build Langfuse trace\")\nconst trace = $('Build Langfuse trace').first().json;\nconst agentName = trace.path;\nconst reportText = trace.answer;\n\n// Step 2: pick the report type from the agent\nlet reportType = 'Report';\nif (agentName === 'Planner') {\n  reportType = 'Project plan (DRAFT)';\n} else if (agentName === 'Risk') {\n  reportType = 'Risk assessment';\n} else if (agentName === 'Status') {\n  reportType = 'Weekly status report';\n}\n\n// Step 3: the date and time it was made, e.g. \"2026-10-25 14:03\"\nconst madeAt = new Date().toISOString().slice(0, 16).replace('T', ' ');\n\n// Step 4: send on the title and text\nreturn [{\n  json: {\n    title: 'Mira — ' + reportType + ' — ' + madeAt,\n    text: reportText\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1856,
+        -96
+      ],
+      "id": "66f98edc-c6de-498c-887c-cf69ef2af407",
+      "name": "Prepare doc (schedule)"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "EMBUiNmzlR4trfgq",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/EMBUiNmzlR4trfgq",
+          "cachedResultName": "Mira Save Doc"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.title }}",
+            "markdown": "={{ $json.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "markdown",
+              "displayName": "markdown",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        2048,
+        -96
+      ],
+      "id": "3ba900ab-8f1e-4d9a-8527-285403b55f92",
+      "name": "Save Doc (schedule)"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "message"
+            },
+            {
+              "name": "test_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1280,
+        -32
+      ],
+      "id": "f8fbec6e-77a7-4685-82ae-48ff03725240",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "description": "Returns blocked, overdue and due-soon tasks with reasons.",
+        "workflowId": {
+          "__rl": true,
+          "value": "tGSELB8NQu5jbv1p",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/tGSELB8NQu5jbv1p",
+          "cachedResultName": "Mira Tools"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "get_overdue_or_blocked"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "sprint",
+              "displayName": "sprint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        304
+      ],
+      "id": "3b148a01-fe37-40c8-89d8-e96f769c6f33",
+      "name": "get_overdue_or_blocked2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Normalize request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Planner",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_description": {
+      "ai_tool": [
+        [
+          {
+            "node": "Planner",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_timeline": {
+      "ai_tool": [
+        [
+          {
+            "node": "Planner",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_risks": {
+      "ai_tool": [
+        [
+          {
+            "node": "Planner",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Planner": {
+      "main": [
+        [
+          {
+            "node": "Build Langfuse trace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Lanfuse": {
+      "main": [
+        [
+          {
+            "node": "Decide delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator": {
+      "main": [
+        [
+          {
+            "node": "Enough data?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enough data?": {
+      "main": [
+        [
+          {
+            "node": "Which Agent?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clarify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Which Agent?": {
+      "main": [
+        [
+          {
+            "node": "Planner",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Risk",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stakeholder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Risk",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_description1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Risk",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_risks1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Risk",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_overdue_or_blocked": {
+      "ai_tool": [
+        [
+          {
+            "node": "Risk",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Risk": {
+      "main": [
+        [
+          {
+            "node": "Build Langfuse trace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clarify": {
+      "main": [
+        [
+          {
+            "node": "Build Langfuse trace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Langfuse trace": {
+      "main": [
+        [
+          {
+            "node": "Send to Lanfuse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Status",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status": {
+      "main": [
+        [
+          {
+            "node": "Build Langfuse trace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "Status",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_upcoming_milestones": {
+      "ai_tool": [
+        [
+          {
+            "node": "Status",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_overdue_or_blocked1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Status",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare doc": {
+      "main": [
+        [
+          {
+            "node": "Save Doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Doc": {
+      "main": [
+        [
+          {
+            "node": "Reply to chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize request": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Monday 9am": {
+      "main": [
+        [
+          {
+            "node": "Normalize request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to chat": {
+      "main": [
+        []
+      ]
+    },
+    "Build Slack message": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Stakeholder",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_tasks1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Stakeholder",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stakeholder": {
+      "main": [
+        [
+          {
+            "node": "Send for approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send for approval": {
+      "main": [
+        [
+          {
+            "node": "Build Langfuse trace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide delivery": {
+      "main": [
+        [
+          {
+            "node": "Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delivery": {
+      "main": [
+        [
+          {
+            "node": "Prepare doc",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply to chat",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare doc (schedule)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare doc (schedule)": {
+      "main": [
+        [
+          {
+            "node": "Save Doc (schedule)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Doc (schedule)": {
+      "main": [
+        [
+          {
+            "node": "Build Slack message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Normalize request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_overdue_or_blocked2": {
+      "ai_tool": [
+        [
+          {
+            "node": "Stakeholder",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "21594efc-d35f-4480-8c76-3276102d90fb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1de781cf41a5685c1889329b735031cf9512ef0986eaa2687a28eaeaa8fde3f9"
+  },
+  "nodeGroups": [],
+  "id": "1bHvXFW14VTZP2ER",
+  "tags": []
+}

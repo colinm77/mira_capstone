@@ -1,0 +1,78 @@
+{
+  "_about": "Mira's own settings and assumptions. Not part of the original resource files. Upload to the Google Drive folder 'Mira Project Files'.",
+  "as_of_date": "2026-04-28",
+  "project_start": "2026-03-30",
+  "current_sprint": "Sprint 3",
+  "due_soon_days": 7,
+  "milestone_window_days": 14,
+  "risk_mitigation": {
+    "R01": {
+      "tasks": [
+        "T004",
+        "T006",
+        "T010",
+        "T011"
+      ],
+      "strength": "strong"
+    },
+    "R02": {
+      "tasks": [
+        "T015",
+        "T019",
+        "T021"
+      ],
+      "strength": "strong"
+    },
+    "R03": {
+      "tasks": [
+        "T020"
+      ],
+      "strength": "weak",
+      "note": "T020 trains users, not AI/ML talent"
+    },
+    "R04": {
+      "tasks": [
+        "T016",
+        "T020"
+      ],
+      "strength": "strong"
+    },
+    "R05": {
+      "tasks": [
+        "T025"
+      ],
+      "strength": "strong"
+    },
+    "R06": {
+      "tasks": [
+        "T009"
+      ],
+      "strength": "weak",
+      "note": "Vendor evaluation is only loosely tied to cost control"
+    },
+    "R07": {
+      "tasks": [
+        "T008"
+      ],
+      "strength": "strong"
+    },
+    "R08": {
+      "tasks": [
+        "T022"
+      ],
+      "strength": "strong"
+    },
+    "R09": {
+      "tasks": [
+        "T024"
+      ],
+      "strength": "strong"
+    },
+    "R10": {
+      "tasks": [
+        "T009"
+      ],
+      "strength": "strong"
+    }
+  }
+}

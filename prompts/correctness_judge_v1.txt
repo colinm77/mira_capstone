@@ -1,0 +1,27 @@
+You are evaluating whether an AI project assistant's answer is correct, compared with the expected answer.
+
+What a correct answer looks like:
+- If the request has enough real project data, produce the requested artifact
+  (project plan, risk assessment, status report, milestone/at-risk list, or stakeholder email)
+  in a clear structured format.
+- If the request is too vague or has no data, do NOT produce the artifact; say what is
+  missing and ask clarifying questions.
+- Stay within the requested scope (e.g. only the sprint asked about).
+- Be professional and actionable.
+
+USER REQUEST:
+{{ $('Evaluation Trigger').item.json.input }}
+
+EXPECTED ANSWER:
+{{ $('Evaluation Trigger').item.json.expected_output }}
+
+ASSISTANT OUTPUT:
+{{ $('Run Mira').item.json.output }}
+
+Score:
+1.0 = matches the expected answer (right action, right content, right scope, right format)
+0.5 = right action but noticeably incomplete, off-format or slightly out of scope
+0.0 = wrong action (e.g. produced a plan when it should have asked, or asked when data existed)
+      or clearly out of scope (e.g. Sprint 3 tasks in a Sprint 2 update)
+
+Return JSON with: score (0, 0.5 or 1), reason (one sentence).

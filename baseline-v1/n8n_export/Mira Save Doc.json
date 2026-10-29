@@ -1,0 +1,133 @@
+{
+  "name": "Mira Save Doc",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "title"
+            },
+            {
+              "name": "markdown"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        64
+      ],
+      "id": "621e0020-f42f-4d75-90cc-726a73f0c33d",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.markdown }}",
+        "destinationKey": "html",
+        "options": {
+          "tables": true
+        }
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        64
+      ],
+      "id": "d6740f42-ee3e-4e45-8490-f03cd105f228",
+      "name": "Markdown to HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "// WHAT THIS DOES (\"Mira Save Doc\" workflow)\n// Packages the report so Google Drive can turn it into a formatted Google Doc.\n// In:  the title (from the trigger) and the report as HTML (from the \"Markdown to HTML\" node)\n// Out: an upload \"body\" in Drive's multipart format + its content type,\n//      ready for the \"Upload as Google Doc\" HTTP Request node.\n// Drive converts the HTML into a real Google Doc (headings, tables, bullets) because we\n// ask for mimeType \"application/vnd.google-apps.document\".\n\n// Step 1: SETTING — the ID of the \"Mira Reports\" folder in Google Drive\n// (the code after /folders/ in the folder's URL). This is a deployment setting, not project data.\nconst reportsFolderId = '1XG5GDBhd6I3dHskdh3DombIe781vmEGc';\n\n// Step 2: the title (sent by the caller) and the HTML\nconst title = $('When Executed by Another Workflow').first().json.title;\nlet html = $('Markdown to HTML').first().json.html || '';\n\n// Step 3: give tables visible borders (Drive keeps these when it converts)\nhtml = html.split('<table>').join('<table border=\"1\" cellpadding=\"4\" style=\"border-collapse:collapse\">');\nconst fullHtml = '<html><head><meta charset=\"UTF-8\"></head><body>' + html + '</body></html>';\n\n// Step 4: the file details Drive needs: name, \"make it a Google Doc\", and the folder\nconst fileDetails = {\n  name: title,\n  mimeType: 'application/vnd.google-apps.document',\n  parents: [reportsFolderId]\n};\n\n// Step 5: build the multipart body (part 1 = file details, part 2 = the HTML)\nconst boundary = 'mira_boundary_' + Date.now();\nconst lineBreak = '\\r\\n';\nlet body = '';\nbody = body + '--' + boundary + lineBreak;\nbody = body + 'Content-Type: application/json; charset=UTF-8' + lineBreak + lineBreak;\nbody = body + JSON.stringify(fileDetails) + lineBreak;\nbody = body + '--' + boundary + lineBreak;\nbody = body + 'Content-Type: text/html; charset=UTF-8' + lineBreak + lineBreak;\nbody = body + fullHtml + lineBreak;\nbody = body + '--' + boundary + '--';\n\n// Step 6: send it on to the HTTP Request node\nreturn [{\n  json: {\n    contentType: 'multipart/related; boundary=' + boundary,\n    body: body\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        64
+      ],
+      "id": "3b88c7ed-74ba-42aa-99ea-dae7a54e8cb8",
+      "name": "Build upload"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "={{ $json.contentType }}",
+        "body": "={{ $json.body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        304,
+        64
+      ],
+      "id": "2de189a2-2f92-4993-accf-1bfb72d96fe2",
+      "name": "HTTP Request",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YfL5cFCm0C3hBtAa",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Markdown to HTML": {
+      "main": [
+        [
+          {
+            "node": "Build upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build upload": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Markdown to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e53305a5-50dd-4a42-8807-dc67eb0b2e69",
+  "meta": {
+    "instanceId": "1de781cf41a5685c1889329b735031cf9512ef0986eaa2687a28eaeaa8fde3f9"
+  },
+  "nodeGroups": [],
+  "id": "EMBUiNmzlR4trfgq",
+  "tags": []
+}

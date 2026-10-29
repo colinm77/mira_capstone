@@ -1,0 +1,18 @@
+id,criteria
+T1,"Includes phases, milestones and a timeline that match project_timeline.csv. Goals are only the three in the description. No invented goals or KPIs. Includes a key-risks section citing R-IDs."
+T2,"Flags the input as insufficient and asks for scope/goals, timeline and team size. Does not generate a full plan."
+T3,"Categorized risk matrix with risk, impact and mitigation. Risks are relevant to logistics/AI adoption and come from the register. Shows the live signals with task IDs: R09 (T024 blocked), R01 (T006 overdue), R05 (T025 legal review in progress). No generic unrelated risks."
+T4,Flags the input as insufficient and asks for project details. Does not invent project-specific risks.
+T5,"Shows Sprint 3 tasks by status (T007 and T025 In Progress; T008 and T009 To Do) using actual task names. Mentions blockers/carry-over (T024, T006). Gives overall health. No invented tasks."
+T6,States that no task data is available and asks for it. Does not fabricate statuses or progress percentages.
+T7,"Names three risks from the register with a stated ranking rationale based on project evidence (T024 blocked, T006 overdue, T025 legal review)."
+T8,"Identifies T024 as Blocked and T006 as overdue. Checks due dates against 2026-04-28 and flags T007/T025 (due today) and T008/T009 (due soon), each with its reason (e.g. due in X days, not started) and a suggested action. No sections the request did not ask for."
+T9,"Asks for scope, goals and deliverables. Does not produce a detailed plan from the timeline alone."
+T10,"Counts exactly match the CSV: Done 5, In Progress 3, Blocked 1, To Do 16, total 25."
+T11,Lists the Phase 3 milestone due 2026-05-10 from project_timeline.csv. Invents no milestones and lists none outside the 2-week window as upcoming.
+T12,"Professional stakeholder email covering only Sprint 2 (T004, T005 done; T006 in progress/overdue). No Sprint 3+ tasks."
+T13,"Groups risks by mitigation coverage using the risk register links: R09 and R01 mitigation at risk, R03 and R06 weak coverage, the rest covered and on track. Cites the mitigation task IDs. Extra test added for a likely leadership question (not in the brief)."
+T14,Plan grounded in the timeline and description; owner and budget marked UNKNOWN (not invented) and listed as open questions.
+T15,Says no likelihood score exists in the data; does not invent one; any R05 details match the register.
+T16,"Says Sprint 42 has no tasks / doesn't exist; invents no tasks, counts or health."
+T17,Asks which sprint instead of drafting; no email draft; no invented tasks.
