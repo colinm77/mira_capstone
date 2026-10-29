@@ -17,7 +17,7 @@ Core plans, risk assessments and status reports are saved as Google Docs. A week
 
 I evaluated Mira in n8n. An evaluation workflow runs each test through Mira, scores it with two gpt-4.1 judges and writes the results to a [Google Sheet](https://docs.google.com/spreadsheets/d/1s5ycENt8-rFJuF1IEpWRB79vfeizXutrNx4_s-dDzVc/edit?usp=sharing), where I added my own verdict. The brief gives 12 tests (T1–T12). **I added 5 (T13–T17)** so every agent faced its hardest case, usually data that doesn't exist: a sprint, a field or an owner. **All results below cover all 17 tests.**
 
-**The 3 metrics.** I judged Mira on one metric per core agent, each averaged over that agent's tests (full definitions in [§2.5](#25-baseline-testing-and-results)):
+**The 3 metrics.** I judged Mira on one metric per core capability (plan, risk, status), each averaged over a fixed set of tests for that capability (full definitions in [§2.5](#25-baseline-testing-and-results)):
 - **Plan groundedness:** is everything in the plan traceable to the project data? Target ≥ 0.95.
 - **Risk relevance:** are the risks specific to this project and taken from the risk file? Target ≥ 0.9.
 - **Status accuracy:** do counts, statuses and dates match the task board and timeline? Target ≥ 0.9, with the task-count test (T10) at exactly 1.0.
@@ -374,13 +374,21 @@ Langfuse is for observability only, not evaluation. Scoring happens in n8n, and 
 
 #### The 3 metrics
 
-I defined one metric per core agent. Tests are grouped by what the user asked (a plan, risk or status request). The vague-input tests count too: asking for the missing details instead of guessing scores 1.0.
+Each metric is a score from 0 to 1 for one **core capability**: planning, risk assessment or status reporting. It is worked out from a **fixed set of tests** for that capability, listed in the table below:
+1. A judge scores each test in the set from 0 to 1.
+2. The metric is the **average** of those scores.
+
+**Example:** Risk relevance uses 5 tests (T3, T4, T7, T13, T15). If four score 1.0 and one scores 0.5, Risk relevance = (1 + 1 + 1 + 1 + 0.5) ÷ 5 = **0.90**.
+
+A test belongs to a capability by what the user asked for, not by which part of Mira answered. So the vague requests (T2, T4, T6, T9) count too, even though Clarify answers them instead of an agent. There, the right answer is to ask for the missing details instead of guessing, and doing so scores 1.0.
 
 | Metric | Question it answers | How it is scored | Tests | Target |
 |---|---|---|---|---|
 | **Plan groundedness** | Is everything in the plan traceable to the project data? | Average **Groundedness** judge score: the share of factual claims supported by the data Mira retrieved | T1, T2, T9, T14 | ≥ 0.95 |
 | **Risk relevance** | Are the risks specific to this project and taken from the risk file? | Average **Correctness** judge score against numbered criteria per test: 1.0 = all met, 0.5 = one or two missed, 0 = three or more missed, or the wrong action | T3, T4, T7, T13, T15 | ≥ 0.9 |
 | **Status accuracy** | Do counts, statuses and dates match the task board and timeline? | Average **Correctness** judge score, graded the same way; T10 (task counts) must be exactly 1.0 | T5, T6, T8, T10, T11, T16 | ≥ 0.9, T10 = 1.0 |
+
+The extended capability, stakeholder email, has no metric of its own. Its two tests (T12, T17) are judged like the rest and passed in all 3 final runs (1.0 on both judges). Two tests are too few for a meaningful average; a metric would need at least four. In production I would measure it by the share of emails the PM approves without edits (target ≥ 70%, from UC3).
 
 Full definitions: [doc 04](docs/04_evaluation_metrics.md). How the judges score: [doc 05 A3–A4](docs/05_metric_implementation_and_cost.md).
 
@@ -527,6 +535,7 @@ Next, I would:
 3. **send** real token counts and models to Langfuse
 4. **bring** Risk and Status back under $0.01 per request, e.g. by trimming tool output
 5. **add** conversation memory for follow-up questions
+6. **add** at least two more stakeholder email tests (e.g. another audience, a sprint with no overdue work) and give the email capability its own metric
 
 ### Evaluation and fine-tuning
 The evaluation set, with human verdicts across 3 final runs, is a labelled dataset. I chose **not** to fine-tune: every failure was fixed faster with a prompt, code or a model change, and 17 examples would overfit. Fine-tuning becomes worthwhile after the pilot. PM-corrected outputs, such as emails declined and redrafted in Slack, could train the Stakeholder agent or the Planner, and the same eval workflow would show whether it helps before release.
