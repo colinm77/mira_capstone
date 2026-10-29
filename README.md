@@ -39,7 +39,7 @@ I evaluated Mira in n8n. An evaluation workflow runs each test through Mira, sco
 
 **Evaluation was the main cost.** gpt-4.1 judging was 83% of the day's spend ($2.87 of $3.47), because I re-ran all 17 tests after every change, about 28 runs' worth on that day alone. PMs using Mira never pay this cost. Details: [§2.6](#26-cost-and-evaluation-strategy).
 
-**AI assistance.** I used AI (Claude Opus 5.5) as a coding and writing assistant. It wrote the JavaScript in all the n8n Code nodes, helped build the answer key ([03 Ground truth](docs/03_ground_truth.md)) and helped draft these docs. I made the design decisions, built and connected the workflows in n8n, tested everything and gave the final verdict on every test.
+**AI assistance.** I used AI (Claude Opus 5.5) as a coding and writing assistant. It wrote the JavaScript in all the n8n Code nodes and the agent and judge prompts, following my guidelines, helped build the answer key ([03 Ground truth](docs/03_ground_truth.md)) and helped draft these docs. I made the design decisions, built and connected the workflows in n8n, tested everything and gave the final verdict on every test.
 
 **Where to find each graded item**
 
@@ -149,6 +149,8 @@ I started with gpt-4o-mini for every agent: it is cheap and fast, and the tools 
 - **Status agent:** on gpt-4o-mini, the Status agent sometimes dropped items from long sprint reports (e.g. it left out the blocked task in T5) ([CHG-16](docs/06_change_log.md)).
 
 That adds about one cent per Risk or Status request, which I judged worth it. All models run at Sampling Temperature 0, so runs are comparable.
+
+Claude Opus 5.5 wrote the prompts to my guidelines; I tested and revised them through the change log ([prompts](final-v1/prompts/)).
 
 #### Workflows
 
