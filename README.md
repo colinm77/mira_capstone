@@ -39,6 +39,8 @@ I evaluated Mira in n8n. An evaluation workflow runs each test through Mira, sco
 
 **Evaluation was the main cost.** gpt-4.1 judging was 83% of the day's spend ($2.87 of $3.47), because I re-ran all 17 tests after every change, about 28 runs' worth on that day alone. PMs using Mira never pay this cost. Details: [§2.6](#26-cost-and-evaluation-strategy).
 
+**AI assistance.** I used AI (Claude Opus 5.5) as a coding and writing assistant. It wrote the JavaScript in all the n8n Code nodes, helped build the answer key ([03 Ground truth](docs/03_ground_truth.md)) and helped draft these docs. I made the design decisions, built and connected the workflows in n8n, tested everything and gave the final verdict on every test.
+
 **Where to find each graded item**
 
 | Assignment item | Where |
@@ -106,7 +108,7 @@ At first the Orchestrator made every routing decision itself. During evaluation,
 
 #### Tools: code calculates, the LLM explains
 
-I decided early that the LLMs would never count, compare dates or read the files themselves. Each agent calls tools in **Mira Tools**. There, code reads the project files and my `mira_config.json`, parses the CSV fields, does the calculations and returns a small JSON result. The agent only explains it. That keeps numbers exact and every claim traceable to a task or risk ID. The trade-off is that the data files must keep a fixed format (column names, date format). Details: [PRD §4.3](docs/02_prd.md).
+I decided early that the LLMs would never count, compare dates or read the files themselves. Each agent calls tools in **Mira Tools**. There, code reads the project files and my `mira_config.json`, parses the CSV fields, does the calculations and returns a small JSON result. The agent only explains it. That keeps numbers exact and every claim traceable to a task or risk ID. The trade-off is that the data files must keep a fixed format (column names, date format). Details: [PRD §4.3](docs/02_prd.md). I used AI (Claude Opus 5.5) to write the JavaScript in all the Code nodes. I set the rules for each tool (what to count, filter and return), then tested every tool against the data files. All the code is in [final-v1/n8n_code/](final-v1/n8n_code/).
 
 #### My config file: mira_config.json
 
