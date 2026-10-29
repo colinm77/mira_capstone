@@ -1,6 +1,17 @@
 # 03 — Ground Truth Data
 
-This file is the answer key for all 17 tests: the 12 from the brief (T1–T12) and the 5 I added (T13–T17). All facts are computed from the CSV files, not from the problem statement. The machine-readable version is [`../data/ground_truth.json`](../data/ground_truth.json). Each test there has the Langfuse dataset-item shape: `input`, `expected_output` and `metadata` (optional exact-match checks). Running `python scripts/json_to_csv.py` regenerates [`../data/mira_eval_dataset.csv`](../data/mira_eval_dataset.csv), the import file for an n8n Sheet/Data Table or a Langfuse dataset. Edit the JSON, never the CSV.
+**03 Ground Truth** is the answer key for all 17 tests: for each test, the correct answer Mira should give. This page is the human-readable version. The same answers are in [`data/ground_truth.json`](../data/ground_truth.json), which feeds the evaluation.
+
+I used AI (Claude Opus 5.5) to help me build this answer key. It worked out the facts from the data files, drafted the expected answers and criteria, and helped me check them against the CSV files. I reviewed and approved every answer, and I made the final pass/fail call on each test myself.
+
+T1–T12 come from the brief's *Baseline Test Dataset for Core Capabilities*: I copied the inputs word for word. I built each expected answer in two steps:
+
+1. **Expected answer:** I expanded the brief's "Expected Output Must Contain" note into a full answer with the exact IDs, names, dates and counts from the CSV files.
+2. **Criteria:** I turned that answer into a numbered checklist the judge grades against (`data/judge_criteria_v5.csv`; see change log CHG-01c and CHG-07).
+
+T13–T17 are my own additions, built the same way.
+
+All facts are computed from the CSV files, not from the problem statement. Each test in the JSON has the Langfuse dataset-item shape: `input`, `expected_output` and `metadata` (optional exact-match checks). Running `python scripts/json_to_csv.py` regenerates [`../data/mira_eval_dataset.csv`](../data/mira_eval_dataset.csv), the import file for an n8n Sheet/Data Table or a Langfuse dataset. Edit the JSON, never the CSV.
 
 **Fixed reference dates**
 - `AS_OF_DATE = 2026-04-28` (Tuesday, end of Sprint 3)
@@ -8,9 +19,13 @@ This file is the answer key for all 17 tests: the 12 from the brief (T1–T12) a
 
 ---
 
-## 1. Derived facts — task board (`sample_task_board.csv`, 25 tasks)
+Sections 1–3 list the facts I worked out from each data file (counts, dates, filters). Each test's correct answer in §4 is built from these, and §4 is what the evaluation checks.
+
+## 1. Answer facts from the task board (`sample_task_board.csv`, 25 tasks)
 
 ### 1.1 Status counts (whole board)
+
+**Used in:** T10 (expected answer: Done 5, In Progress 3, Blocked 1, To Do 16)
 
 | Done | In Progress | Blocked | To Do | Total |
 |---|---|---|---|---|
@@ -24,6 +39,8 @@ This file is the answer key for all 17 tests: the 12 from the brief (T1–T12) a
 > ⚠ The problem statement says "3 Done". The CSV has 5 Done. **The CSV is the ground truth.**
 
 ### 1.2 Tasks by sprint
+
+**Used in:** T5 (Sprint 3 status report), T12 (Sprint 2 email), T16 (Sprint 42 doesn't exist; the board has Sprints 1–10)
 
 | Sprint | Tasks (status, due date) |
 |---|---|
@@ -40,6 +57,8 @@ This file is the answer key for all 17 tests: the 12 from the brief (T1–T12) a
 
 ### 1.3 Blocked / overdue / at risk (as of 2026-04-28)
 
+**Used in:** T8 (expected answer). Also T3, T5, T7 and T13, which cite T024 (blocked) and T006 (overdue) as evidence
+
 | Task | Name | Owner | Status | Due | Flag | Reason |
 |---|---|---|---|---|---|---|
 | **T024** | Security review of AI infrastructure | James Wong | Blocked | 5/26 | **Blocked** | Waiting for security team availability |
@@ -49,17 +68,9 @@ This file is the answer key for all 17 tests: the 12 from the brief (T1–T12) a
 | T008 | Define success criteria for each use case | Sarah Lin | To Do | 5/2 | Due in 4 days | Not started; depends on T007 |
 | T009 | Vendor evaluation for ML platform | James Wong | To Do | 5/5 | Due in 7 days | Not started |
 
-### 1.4 Open workload by assignee (not Done)
+## 2. Answer facts from the timeline (`project_timeline.csv`)
 
-| Assignee | Open tasks |
-|---|---|
-| Arjun Mehta | 4 |
-| James Wong | 4 |
-| Priya Nair | 4 |
-| Ravi Kumar | 4 |
-| Sarah Lin | 4 |
-
-## 2. Derived facts — timeline (`project_timeline.csv`)
+**Used in:** T1 and T14 (8 phases, dates, milestones), T11 (milestone due 5/10), T7 (overdue gap analysis report)
 
 | Phase | Name | Weeks | Start | End | Milestones / deliverables |
 |---|---|---|---|---|---|
@@ -83,13 +94,13 @@ This file is the answer key for all 17 tests: the 12 from the brief (T1–T12) a
 
 **Also note:** Phase 4 starts 2026-05-11. Its milestones are due 2026-06-07, outside the 2-week window.
 
-## 3. Derived facts — description and risks
+## 3. Answer facts from the description and risks
+
+**Used in:** T1 (goals and business areas), T14 (goals), T3, T7, T13 and T15 (risk register and top 3)
 
 **Stated goals (only these three):** reduce delivery delays by 15%; lower operational costs by 10%; improve service responsiveness.
 
-**Functions in scope:** demand forecasting, route optimization, inventory management, customer support.
-
-**Approach:** assessment of workflows and data infrastructure → pilots in targeted departments → phased rollout. Overseen by a cross-functional task force (data scientists, IT, business stakeholders).
+**Business areas the project covers:** demand forecasting, route optimization, inventory management, customer support.
 
 **Risk register:** R01–R10 (10 risks, 10 categories). Valid IDs are R01–R10 only.
 
@@ -98,11 +109,11 @@ This file is the answer key for all 17 tests: the 12 from the brief (T1–T12) a
 2. **R01 Data Quality & Availability** — T006 data-gap analysis is overdue
 3. **R05 Ethical & Legal Concerns** — T025 legal review of data usage is due today, still In Progress
 
-## 4. Expected results per test
+## 4. Expected results per test *(used by the evaluation)*
 
 | ID | Expected type | Must contain | Must NOT contain |
 |---|---|---|---|
-| T1 | plan | Phases from the timeline; milestones; timeline (24 weeks / 6 months); the 3 stated goals; the 4 functions | Goals or KPIs not in the description |
+| T1 | plan | Phases from the timeline; milestones; timeline (24 weeks / 6 months); the 3 stated goals; the 4 business areas | Goals or KPIs not in the description |
 | T2 | clarification | Flags insufficient detail; asks for scope, timeline, team size | A phased plan or timeline table |
 | T3 | risk_matrix | Categorized risks from R01–R10, tied to logistics/AI context; impact + mitigation | Risks unrelated to the project; IDs outside R01–R10 |
 | T4 | clarification | Flags insufficient info; asks for project details (domain, scope, goals) | Any risk matrix or project-specific risks |
@@ -120,7 +131,7 @@ This file is the answer key for all 17 tests: the 12 from the brief (T1–T12) a
 | T16 *(extra, Status)* | status_no_data | No tasks for Sprint 42 | Invented tasks, counts or health |
 | T17 *(extra, Stakeholder)* | clarification | Asks which sprint; asks to resend with the sprint | An email draft or task IDs |
 
-## 5. Data discrepancies to document
+## 5. Data discrepancies *(background, not tested)*
 
 1. Done count in the problem statement (3) ≠ CSV (5).
 2. Task board ends 2026-08-04 (T023), but timeline Phase 8 ends 2026-09-13. The board schedule is compressed relative to the plan.

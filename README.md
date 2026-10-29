@@ -398,7 +398,9 @@ I ran all evaluation in n8n and kept the results in a Google Sheet. The **Mira �
 
 📊 **Evaluation results sheet:** [Mira Eval Dataset](https://docs.google.com/spreadsheets/d/1s5ycENt8-rFJuF1IEpWRB79vfeizXutrNx4_s-dDzVc/edit?usp=sharing) (view only, live) · frozen copy: [final-v1/mira_eval_results.xlsx](final-v1/mira_eval_results.xlsx)
 
-The brief gives 12 test inputs (T1–T12). I added 5 more (T13–T17) so every agent was tested on its hardest case, usually data that doesn't exist:
+The 12 brief tests come from the assignment's *Baseline Test Dataset for Core Capabilities*. I expanded each "Expected Output Must Contain" note into a full expected answer and a checklist for the judge (see [03 Ground truth](docs/03_ground_truth.md)). I used Claude Opus 5.5 to help build the answer key; I reviewed every answer myself.
+
+I added 5 more tests (T13–T17) so every agent was tested on its hardest case, usually data that doesn't exist:
 
 | Test | Agent | What it adds |
 |---|---|---|
