@@ -139,7 +139,7 @@ Return JSON with: score (0, 0.5 or 1), evidence (list: one line per item, "<item
 
 | Step | n8n node | What it does |
 |---|---|---|
-| 1 | **Evaluation Trigger** | Reads the 12-row dataset (Google Sheet / Data Table imported from `mira_eval_dataset.csv`) and runs one row at a time |
+| 1 | **Evaluation Trigger** | Reads the 17-row dataset (Google Sheet / Data Table imported from `mira_eval_dataset.csv`) and runs one row at a time |
 | 2 | **Execute Workflow** | Calls Mira with `input` and `eval_mode: true` (skips Slack approval, email sending and saving to Google Docs). Mira returns `output` and `context` (tool results) |
 | 3 | **Evaluation: Set Outputs** | Writes Mira's `output` back into the dataset row |
 | 4 | **Basic LLM Chain** ×2 | Groundedness and Correctness prompts (A3, A4), each with a **Structured Output Parser** for the JSON |

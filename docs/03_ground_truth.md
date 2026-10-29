@@ -1,6 +1,6 @@
 # 03 — Ground Truth Data
 
-This file is the answer key for the 12 baseline tests. All facts are computed from the CSV files, not from the problem statement. The machine-readable version is [`../data/ground_truth.json`](../data/ground_truth.json). Each test there has the Langfuse dataset-item shape: `input`, `expected_output` and `metadata` (optional exact-match checks). Running `python scripts/json_to_csv.py` regenerates [`../data/mira_eval_dataset.csv`](../data/mira_eval_dataset.csv), the import file for an n8n Sheet/Data Table or a Langfuse dataset. Edit the JSON, never the CSV.
+This file is the answer key for all 17 tests: the 12 from the brief (T1–T12) and the 5 I added (T13–T17). All facts are computed from the CSV files, not from the problem statement. The machine-readable version is [`../data/ground_truth.json`](../data/ground_truth.json). Each test there has the Langfuse dataset-item shape: `input`, `expected_output` and `metadata` (optional exact-match checks). Running `python scripts/json_to_csv.py` regenerates [`../data/mira_eval_dataset.csv`](../data/mira_eval_dataset.csv), the import file for an n8n Sheet/Data Table or a Langfuse dataset. Edit the JSON, never the CSV.
 
 **Fixed reference dates**
 - `AS_OF_DATE = 2026-04-28` (Tuesday, end of Sprint 3)

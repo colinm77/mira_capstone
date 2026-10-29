@@ -1,14 +1,14 @@
 # 04 — Evaluation Metrics
 
-**Purpose:** define how we judge whether Mira is good enough to roll out. Following the capstone playbook (Step 6.4), Mira has **one metric per core agent**. All metrics are measured on the 12 brief tests plus 5 extra tests of our own (T13–T17, at least one per agent) in [`ground_truth.json`](../data/ground_truth.json).
+**Purpose:** define how we judge whether Mira is good enough to roll out. Following the capstone playbook (Step 6.4), Mira has **one metric per core capability** (plan, risk, status). Each test belongs to one capability, decided by what the request asks for. All metrics are measured on the 12 brief tests plus 5 extra tests of our own (T13–T17, at least one per capability) in [`ground_truth.json`](../data/ground_truth.json).
 
 ---
 
-## 1. The three metrics (one per core agent)
+## 1. The three metrics (one per core capability)
 
-| Metric | Agent | Question it answers | Measured by | Tests | Target |
+| Metric | Capability | Question it answers | Measured by | Tests | Target |
 |---|---|---|---|---|---|
-| **Plan groundedness** | Planner | Is everything in the plan traceable to the project data (phases, milestones, goals, risks)? | Groundedness judge | T1, T2, T9, T14 | Average ≥ 0.95 |
+| **Plan groundedness** | Plan | Is everything in the plan traceable to the project data (phases, milestones, goals, risks)? | Groundedness judge | T1, T2, T9, T14 | Average ≥ 0.95 |
 | **Risk relevance** | Risk | Are the risks specific to this project and taken from the risk file, not generic? | Correctness judge | T3, T4, T7, T13, T15 | Average ≥ 0.9 |
 | **Status accuracy** | Status | Do counts, statuses and dates match the task board and timeline? | Correctness judge | T5, T6, T8, T10, T11, T16 | Average ≥ 0.9; T10 = 1.0 |
 
@@ -28,7 +28,7 @@ Every test gets **two verdicts**:
 - **Judge agreement** = tests where the LLM verdict matches the human verdict ÷ 13. Reported with every run. It shows whether the automated judge can be trusted; any disagreement is explained in the note.
 - The human reviews every output against the test's expected answer (`ground_truth.json`) — the same check the TAs do.
 - The write-up reports **"X / 12 brief tests passed"** (target: 12 / 12) and, separately, **"X / N extra tests passed"** (target ≥ 90%). The brief's 12 tests are the minimum; extra tests (T13+) are our own additions.
-- **T12 and T17** (Stakeholder, extended capability) have no metric of its own, but they count in the pass/fail totals.
+- **T12 and T17** (Stakeholder, extended capability) have no metric of their own, but they count in the pass/fail totals.
 
 ## 3. The two judges
 
