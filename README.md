@@ -293,7 +293,7 @@ The `get_risks` tool then checks those tasks against the task board. A risk whos
 
 #### Monday status report (scheduled)
 
-Every Monday at 09:00, the **Every Monday 9am** trigger runs the Status agent with no chat input. It saves the report as a Google Doc and posts it to Slack **#mira-reports**.
+Every Monday at 09:00, the **Every Monday 9am** trigger sends a fixed request ("weekly status report for the current sprint") through the Orchestrator, which routes it to the Status agent. It saves the report as a Google Doc and posts it to Slack **#mira-reports**.
 
 📄 **Google Doc Mira saved:** [Mira — Monday status report](https://docs.google.com/document/d/1J0ZNSw_ueloXw4M1Nc4LKYINIMjschdlujugxsrk8uQ/edit?usp=sharing) (view only)
 

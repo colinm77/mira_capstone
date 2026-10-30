@@ -131,7 +131,7 @@ Return JSON with: score (0, 0.5 or 1), evidence (list: one line per item, "<item
 
 **Known limit:** on long table answers the judge is still not fully stable. In the final runs it failed the same T13 answer in final-1 and passed it in final-3, for a different (wrong) reason each time; the human review overruled it (change log, Final results).
 
-**Judge model:** gpt-4.1 at temperature 0. It's deliberately a different model from all of Mira's (gpt-4o-mini, and gpt-4o for Risk and Status), and at least as capable, to avoid self-grading bias.
+**Judge model:** gpt-4.1 at temperature 0. It's deliberately a different model from all of Mira's (gpt-4o-mini, and gpt-4o for Risk and Status), and at least as capable, to avoid self-grading bias. *Later finding: gpt-4.1 is not a reasoning model, so it isn't clearly stronger than gpt-4o. A side test with a reasoning judge is in [README §4](../README.md#what-i-learned-from-the-traces).*
 
 ### A5. Where it runs — n8n (primary) or Langfuse (alternative)
 
