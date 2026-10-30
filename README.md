@@ -553,13 +553,15 @@ I took Mira from 7/17 to 17/17 by making one change at a time, re-running all 17
 - **rebuilt** the Correctness judge so its scores could be trusted
 
 Next, I would:
-1. **add** a hold-out test set, since the judge and the fixes were tuned on the same 17 tests
-2. **add** a code check that flags any task or risk ID in an answer that isn't in the data, to back up the LLM judge
-3. **send** real token counts and models to Langfuse
-4. **bring** Risk and Status back under $0.01 per request, e.g. by trimming tool output
-5. **add** conversation memory for follow-up questions
-6. **add** at least two more stakeholder email tests (e.g. another audience, a sprint with no overdue work) and give the email capability its own metric
-7. **switch** the judges to a reasoning model, make the T13 criteria clearer, and stop the Stakeholder agent from giving reasons that aren't in the data
+1. **swap in** gpt-5.6-luna as the judge for both Groundedness and Correctness. In the side test it gave better reasons and caught an error gpt-4.1 missed
+2. **make** the T13 criteria clearer, so the answer must say which mitigation task is blocked and which is overdue
+3. **stop** the Stakeholder agent from giving reasons that aren't in the data (T12)
+4. **add** a hold-out test set, since the judge and the fixes were tuned on the same 17 tests
+5. **add** a code check that flags any task or risk ID in an answer that isn't in the data, to back up the LLM judge
+6. **send** real token counts and models to Langfuse
+7. **bring** Risk and Status back under $0.01 per request, e.g. by trimming tool output
+8. **add** conversation memory for follow-up questions
+9. **add** at least two more stakeholder email tests (e.g. another audience, a sprint with no overdue work) and give the email capability its own metric
 
 ### Evaluation and fine-tuning
 The evaluation set, with human verdicts across 3 final runs, is a labelled dataset. I chose **not** to fine-tune: every failure was fixed faster with a prompt, code or a model change, and 17 examples would overfit. Fine-tuning becomes worthwhile after the pilot. PM-corrected outputs, such as emails declined and redrafted in Slack, could train the Stakeholder agent or the Planner, and the same eval workflow would show whether it helps before release.
