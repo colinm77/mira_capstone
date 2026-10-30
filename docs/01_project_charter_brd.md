@@ -2,7 +2,7 @@
 
 **Project:** AI Project Assistant (the course brief calls it "Mira — AI-Powered Project Intelligence Assistant")
 **Sponsor:** CTO, Nexora Pvt. Ltd.
-**Owner:** AI PM/TPM (author)
+**Owner:** AI TPM (author)
 **Status:** Final v1.0
 
 ---
@@ -37,7 +37,7 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 |---|---|---|
 | BO1 | Cut time to produce a first-draft project plan | 3–4 hrs → ≤ 30 min (incl. PM review) |
 | BO2 | Cut time to produce a weekly status report | 1–2 hrs → ≤ 15 min |
-| BO3 | Standardize artifacts across projects | 100% of the assistant's outputs follow the defined templates |
+| BO3 | Standardize artifacts across projects | Every output uses the fixed format set in its agent's prompt ([prompts](../final-v1/prompts/)); checked by hand in the human review, and by the judge where a test's criteria include the format |
 | BO4 | Surface at-risk milestones before they are missed | At-risk items flagged on request, including tasks due within 7 days |
 | BO5 | Trustworthy output | 0 fabricated tasks, risks or milestones in evaluation |
 
@@ -115,18 +115,18 @@ Metric definitions are in [04 Evaluation metrics](04_evaluation_metrics.md).
 
 ## 10. Decision-making and governance
 
-- **Scope or architecture changes:** AI PM decides and informs the CTO. Changes that affect cost or vendor need CTO approval.
+- **Scope or architecture changes:** AI TPM decides and informs the CTO. Changes that affect cost or vendor need CTO approval.
 - **Go/no-go for rollout:** CTO approves, based on SC1–SC5 evaluation results and the security/legal sign-off.
 - **Prompt and model changes:** every change is re-run against the 17-test evaluation set. No regression is allowed on SC1–SC3.
 - **Cadence:** weekly 30-min review of evaluation results and trace findings.
 
 ## 11. Rollout plan
 
-> **Note:** Stage 0 is carried out in this capstone. Stages 1–3 are the proposed plan for a real rollout to 10 PMs/TPMs (brief Q4), and their targets are planned, not measured.
+> **Note:** Stage 0 is the build and test I did in this capstone. Stages 1–3 are the proposed plan for a real rollout to 10 PMs/TPMs (brief Q4), and their targets are planned, not measured.
 
 | Stage | Who | Exit criteria |
 |---|---|---|
-| 0. Internal test | AI PM | SC1–SC4 met on the final runs; SC5 met for plan and email, just over for risk and status (≈ $0.011) |
+| 0. Build and test (this capstone) | AI TPM (me), 1 project, 17 tests | SC1–SC4 met on the final runs; SC5 met for plan and email, just over for risk and status (≈ $0.011) |
 | 1. Pilot | 2 PMs, 1 project each, 2 weeks | No critical errors; SC6 ≥ 4/5 |
 | 2. Expand | All 10 PMs/TPMs | Onboarding guide, Slack channel, office hours |
 | 3. Operate | All | Weekly eval re-runs, monthly cost review, feedback backlog |

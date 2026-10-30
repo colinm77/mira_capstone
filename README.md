@@ -524,8 +524,8 @@ Full charter: [docs/01_project_charter_brd.md](docs/01_project_charter_brd.md).
 - **Scope (v1):** one active project; plan, risk and status (core); stakeholder updates with Slack approval (extended); tracing and evaluation. Out of scope: live Jira/Trello sync, portfolio views, fine-tuning.
 - **Success criteria:** SC1–SC3 (the 3 metrics), SC4 (17/17 tests, human verdict), SC5 (cost per request < $0.01), SC6 (pilot satisfaction ≥ 4/5).
 - **Stakeholders:** CTO (sponsor), 10 PMs/TPMs (users), engineering leads, ABCDE Ltd stakeholders, security/legal.
-- **Decision-making:** the AI PM decides scope and design; cost or vendor changes need CTO approval; the CTO makes the go/no-go call on evaluation results and legal sign-off.
-- **Rollout:** internal test → 2-PM pilot → 10 PMs/TPMs → operate (see §4).
+- **Decision-making:** the AI TPM decides scope and design; cost or vendor changes need CTO approval; the CTO makes the go/no-go call on evaluation results and legal sign-off.
+- **Rollout:** build and test → 2-PM pilot → 10 PMs/TPMs → operate (see §4).
 
 ---
 
@@ -576,7 +576,7 @@ The evaluation set, with human verdicts across 3 final runs, is a labelled datas
 ### Rollout to 10 PMs/TPMs
 | Stage | Who | Exit criteria |
 |---|---|---|
-| 0. Internal test (this capstone) | AI PM, 1 project, 17 tests | SC1–SC4 met ✅; SC5 met for plan and email, just over for risk and status |
+| 0. Build and test (this capstone) | AI TPM (me), 1 project, 17 tests | SC1–SC4 met ✅; SC5 met for plan and email, just over for risk and status |
 | 1. Pilot | 2 PMs, 1 project each, 2 weeks | No critical errors; satisfaction ≥ 4/5 |
 | 2. Expand | All 10 PMs/TPMs | Onboarding guide, Slack channel, office hours |
 | 3. Operate | All | Evaluation re-run on every change (regression gate), monthly cost review, feedback backlog. Measure what the capstone couldn't: time to first draft, emails approved without edits (target ≥ 70%) |
