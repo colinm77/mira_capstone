@@ -44,11 +44,15 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 ## 5. Scope
 
 **In scope (v1)**
-- One active project's data: the ABCDE Ltd AI Adoption Project files.
+- Data for one project, ABCDE Ltd's AI Adoption Project, read from the 4 files that came with the brief, stored unchanged in Google Drive:
+  - `project_description.txt`: goals, business areas and approach
+  - `project_timeline_mira.csv`: 8 phases over 24 weeks, with milestones and deliverables
+  - `project_risks_mira.csv`: 10 risks (R01–R10), each with category, impact and mitigation
+  - `sample_task_board_mira.csv`: 25 tasks, each with sprint, owner, status, priority and due date
+- My additions in a separate config file (`mira_config.json`): the as-of date, project start, and which tasks mitigate which risk
 - Core capabilities: plan, risk, status.
 - One extended capability: stakeholder updates, with PM approval in Slack. The Planner also includes a short "Key risks" section.
 - Chat/Slack interface, Langfuse tracing, n8n evaluation workflow against 17 tests (12 from the brief plus T13–T17).
-- Data read from the original resource files (unchanged) in Google Drive; the assistant's settings and mitigation links in a separate config file.
 - The three core outputs (project plan, risk assessment, weekly status report) are also saved to a Google Doc.
 - The weekly status report is also sent automatically every Monday (Google Doc + Slack post).
 
@@ -76,11 +80,13 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 | SC1 | Plan groundedness (Planner) | Average ≥ 0.95 |
 | SC2 | Risk relevance (Risk) | Average ≥ 0.9 |
 | SC3 | Status accuracy (Status) | Average ≥ 0.9; T10 = 1.0 |
-| SC4 | Tests passed — human verdict (PM), with LLM judge scores alongside | **12 / 12 brief tests (T1–T12)**; extra tests (T13+) ≥ 90%; judge agreement reported |
+| SC4 | Tests passed — human verdict (PM), with LLM judge scores alongside | **17 / 17 tests** (12 from the brief + T13–T17); judge agreement reported |
 | SC5 | Cost per request (actual cost from OpenAI usage; Langfuse traces show an estimate) | < US$0.01 |
 | SC6 | Pilot PM satisfaction ("would use weekly") | ≥ 4 / 5 |
 
 Metric definitions are in [04 Evaluation metrics](04_evaluation_metrics.md).
+
+*SC4 raised during the project:* the charter first set 12/12 brief tests and ≥ 90% on extra tests. When I added T13–T17 to cover every agent, I raised it to 17/17.
 
 *SC5 source changed during evaluation:* the charter first named Langfuse traces as the cost source. Langfuse only estimates tokens (from text length) and labels every call with one model, so the actual cost is taken from OpenAI usage instead ([doc 05 B5](05_metric_implementation_and_cost.md), [change log](06_change_log.md)).
 

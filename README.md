@@ -26,9 +26,9 @@ I evaluated Mira in n8n. An evaluation workflow runs each test through Mira, sco
 
 | | Baseline | Final | Target |
 |---|---|---|---|
-| **All tests passed (human verdict)** | **7 / 17** | **17 / 17** | — |
+| **All tests passed (human verdict)** | **7 / 17** | **17 / 17** | 17 / 17 |
 | of which brief tests (T1–T12) | 4 / 12 | 12 / 12 | 12 / 12 |
-| of which my extra tests (T13–T17) | 3 / 5 | 5 / 5 | ≥ 90% |
+| of which my extra tests (T13–T17) | 3 / 5 | 5 / 5 | 5 / 5 |
 | Plan groundedness | 1.00 | **1.00** | ≥ 0.95 |
 | Risk relevance | 0.60 | **0.93** | ≥ 0.9 |
 | Status accuracy | 0.67 | **1.00** (T10 = 1.0) | ≥ 0.9, T10 = 1.0 |
@@ -522,7 +522,7 @@ Full charter: [docs/01_project_charter_brd.md](docs/01_project_charter_brd.md).
 
 - **Vision:** I will build an AI Project Assistant that helps Nexora's PMs and TPMs turn raw project data into ready-to-use, standardized plans, risk assessments and status reports in minutes. Every statement it makes traces back to the source data, and it warns PMs before milestones slip.
 - **Scope (v1):** one active project; plan, risk and status (core); stakeholder updates with Slack approval (extended); tracing and evaluation. Out of scope: live Jira/Trello sync, portfolio views, fine-tuning.
-- **Success criteria:** SC1–SC3 (the 3 metrics), SC4 (12/12 brief tests, human verdict), SC5 (cost per request < $0.01), SC6 (pilot satisfaction ≥ 4/5).
+- **Success criteria:** SC1–SC3 (the 3 metrics), SC4 (17/17 tests, human verdict), SC5 (cost per request < $0.01), SC6 (pilot satisfaction ≥ 4/5).
 - **Stakeholders:** CTO (sponsor), 10 PMs/TPMs (users), engineering leads, ABCDE Ltd stakeholders, security/legal.
 - **Decision-making:** the AI PM decides scope and design; cost or vendor changes need CTO approval; the CTO makes the go/no-go call on evaluation results and legal sign-off.
 - **Rollout:** internal test → 2-PM pilot → 10 PMs/TPMs → operate (see §4).
