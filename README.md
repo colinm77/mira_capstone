@@ -520,7 +520,7 @@ Plan and email requests meet the charter target (< $0.01). Risk and status reque
 
 Full charter: [docs/01_project_charter_brd.md](docs/01_project_charter_brd.md).
 
-- **Vision:** I will build an AI Project Assistant that helps Nexora's PMs and TPMs turn raw project data into ready-to-use, standardized plans, risk assessments and status reports in minutes. Every statement it makes traces back to the source data, and it warns PMs before milestones slip.
+- **Vision:** I will build an AI Project Assistant in n8n that helps Nexora's PMs and TPMs turn raw project data into standardized plans, risk assessments and status reports in minutes. PMs ask for them in the n8n chat, and the assistant saves each one as a Google Doc. Every Monday it posts the weekly status report to Slack automatically. It drafts stakeholder emails that the PM approves in Slack before they are sent. Every statement traces back to the source data, and it flags overdue and blocked work.
 - **Scope (v1):** one active project; plan, risk and status (core); stakeholder updates with Slack approval (extended); tracing and evaluation. Out of scope: live Jira/Trello sync, portfolio views, fine-tuning.
 - **Success criteria:** SC1–SC3 (the 3 metrics), SC4 (17/17 tests, human verdict), SC5 (cost per request < $0.01), SC6 (pilot satisfaction ≥ 4/5).
 - **Stakeholders:** CTO (sponsor), 10 PMs/TPMs (users), engineering leads, ABCDE Ltd stakeholders, security/legal.
@@ -560,7 +560,7 @@ Next, I would:
 5. **add** a code check that flags any task or risk ID in an answer that isn't in the data, to back up the LLM judge
 6. **send** real token counts and models to Langfuse
 7. **bring** Risk and Status back under $0.01 per request, e.g. by trimming tool output
-8. **add** conversation memory for follow-up questions
+8. **build** a Slack chat app so PMs can ask the assistant from Slack instead of the n8n chat. Optionally, add conversation memory for each Slack thread, so follow-up questions like "and what about Sprint 4?" keep the context.
 9. **add** at least two more stakeholder email tests (e.g. another audience, a sprint with no overdue work) and give the email capability its own metric
 
 ### Evaluation and fine-tuning

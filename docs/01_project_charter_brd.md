@@ -29,7 +29,7 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 
 ## 3. Vision
 
-> I will build an AI Project Assistant that helps Nexora's PMs and TPMs turn raw project data into ready-to-use, standardized plans, risk assessments and status reports in minutes. Every statement it makes traces back to the source data, and it warns PMs before milestones slip.
+> I will build an AI Project Assistant in n8n that helps Nexora's PMs and TPMs turn raw project data into standardized plans, risk assessments and status reports in minutes. PMs ask for them in the n8n chat, and the assistant saves each one as a Google Doc. Every Monday it posts the weekly status report to Slack automatically. It drafts stakeholder emails that the PM approves in Slack before they are sent. Every statement traces back to the source data, and it flags overdue and blocked work.
 
 ## 4. Business objectives
 
@@ -50,11 +50,12 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
   - `project_risks_mira.csv`: 10 risks (R01–R10), each with category, impact and mitigation
   - `sample_task_board_mira.csv`: 25 tasks, each with sprint, owner, status, priority and due date
 - My additions in a separate config file (`mira_config.json`): the as-of date, project start, and which tasks mitigate which risk
-- Core capabilities: plan, risk, status.
-- One extended capability: stakeholder updates, with PM approval in Slack. The Planner also includes a short "Key risks" section.
-- Chat/Slack interface, Langfuse tracing, n8n evaluation workflow against 17 tests (12 from the brief plus T13–T17).
-- The three core outputs (project plan, risk assessment, weekly status report) are also saved to a Google Doc.
-- The weekly status report is also sent automatically every Monday (Google Doc + Slack post).
+- **Core capabilities:** project plan, risk assessment, status report. The plan includes a short "Key risks" section.
+- **Extended capability:** stakeholder update emails. The PM approves or declines each draft in Slack, and only approved emails are sent.
+- **Interface:** n8n's built-in chat for every request. No separate chat app.
+- **Outputs:** the three core outputs are saved as Google Docs, with the link shown in chat. Short answers (counts, clarifying questions) stay in chat.
+- **Weekly report:** every Monday at 09:00, the status report is created automatically, saved as a Google Doc and posted to Slack #mira-reports.
+- **Quality and observability:** Langfuse tracing of every request, and an n8n evaluation workflow with 17 tests.
 
 **Out of scope (v1, candidates for phase 2)**
 - Live Jira/Trello API sync. v1 reads the task board from a CSV file in Google Drive.
@@ -62,6 +63,7 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 - Fine-tuning, and RAG over large document sets.
 - Scheduled (proactive) milestone alerts, Resource Allocation Advisor and Competitive Analysis.
 - Writing back to task boards (the assistant is read-only).
+- A separate chat app, or chatting with the assistant from Slack. Slack is used only for the Monday report and email approvals.
 
 ## 6. Stakeholders
 
