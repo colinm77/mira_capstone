@@ -15,9 +15,11 @@ out = root / "data" / "mira_eval_dataset.csv"
 
 with out.open("w", newline="", encoding="utf-8") as f:
     w = csv.writer(f, quoting=csv.QUOTE_ALL)
-    w.writerow(["id", "input", "expected_output", "metadata"])
+    w.writerow(["id", "input", "expected_output", "criteria", "metadata"])
     for t in gt["tests"]:
         meta = {"test_id": t["id"], **t["metadata"]}
-        w.writerow([t["id"], t["input"], t["expected_output"], json.dumps(meta, ensure_ascii=False)])
+        # criteria = the numbered checklist the Correctness judge grades against
+        criteria = t["metadata"].get("judge_criteria", "")
+        w.writerow([t["id"], t["input"], t["expected_output"], criteria, json.dumps(meta, ensure_ascii=False)])
 
 print(f"Wrote {len(gt['tests'])} rows to {out}")

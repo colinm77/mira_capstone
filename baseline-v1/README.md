@@ -7,7 +7,7 @@ A snapshot of Mira exactly as it was for the baseline run. Changes made after th
 | Results + human review (17 tests) | `results_with_human_review.csv` |
 | Readable review page | `review_page.html` |
 | All prompts, as in n8n (Orchestrator, 4 agents, 2 judges) | `prompts/` |
-| Code nodes + n8n workflow exports | `n8n_code/` |
+| Code nodes | `n8n_code/` |
 | Final n8n workflow exports (taken right before the first change) | `n8n_export/` |
 | Config and ground truth used | `mira_config.json`, `ground_truth.json` |
 
