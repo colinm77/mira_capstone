@@ -411,7 +411,7 @@ Full definitions: [doc 04](docs/04_evaluation_metrics.md). How the judges score:
 
 #### How I tested
 
-I ran all evaluation in n8n and kept the results in a Google Sheet. The **Mira – Evaluation** workflow reads the test inputs from the sheet and runs each one through Mira. Two gpt-4.1 judges (Groundedness and Correctness) score it, and the workflow writes every output, score and judge reason back to the sheet, one tab per run. I then reviewed each test and added my own verdict, which is final. A summary tab computes the 3 metrics for every run. Langfuse played no part in scoring.
+I ran all evaluation in n8n and kept the results in a Google Sheet. The **Mira – Evaluation** workflow reads the test inputs from the sheet and runs each one through Mira. Two gpt-4.1 judges (Groundedness and Correctness) score it, and the workflow writes every output, score and judge reason to the sheet's **tests** tab. After each run I copied that tab and named it (e.g. `final-1`). I then reviewed each test and added my own verdict, which is final. A summary tab computes the 3 metrics for every run. Langfuse played no part in scoring.
 
 📊 **Evaluation results sheet:** [Mira Eval Dataset](https://docs.google.com/spreadsheets/d/1s5ycENt8-rFJuF1IEpWRB79vfeizXutrNx4_s-dDzVc/edit?usp=sharing) (view only, live) · frozen copy: [final-v1/mira_eval_results.xlsx](final-v1/mira_eval_results.xlsx)
 
@@ -501,7 +501,7 @@ For cost, I used actual token counts from the OpenAI usage export, not Langfuse'
 
 *These are averages per model over all calls that day, so a long plan uses more output tokens than a short answer. Input is mostly the system prompt, the tool definitions and the tool results; output is small. The exact tokens of any single request are shown in the n8n execution (each OpenAI Chat Model node reports its token usage).*
 
-Judging was the bulk of my spend, because I ran the evaluation so many times. One run costs only about $0.21, but every change meant re-judging all 17 tests. On the day of the final runs I judged about **28 runs' worth** (942 calls). That made the gpt-4.1 judges **$2.87 of the day's $3.47 (83%)**; gpt-4o cost $0.42 and gpt-4o-mini $0.18. I accepted this cost because a judge stronger than the agents it grades is what made the scores trustworthy, and PMs using Mira never pay it.
+Judging was the bulk of my spend, because I ran the evaluation so many times. One run costs only about $0.21, but every change meant re-judging all 17 tests. On the day of the final runs I judged about **28 runs' worth** (942 calls). That made the gpt-4.1 judges **$2.87 of the day's $3.47 (83%)**; gpt-4o cost $0.42 and gpt-4o-mini $0.18. I accepted this cost because I chose gpt-4.1 as the judge believing it was stronger than the agents it grades. I later learned that, like gpt-4o, it is not a reasoning model, so it wasn't clearly a step up (see the side test in [§4](#what-i-learned-from-the-traces)). The fixed criteria are what made its scores trustworthy. PMs using Mira never pay this cost.
 
 Plan and email requests meet the charter target (< $0.01). Risk and status requests are just over it (about $0.011) since the gpt-4o upgrade. I accepted that trade for correct answers ([doc 05 B5](docs/05_metric_implementation_and_cost.md)).
 
@@ -535,6 +535,8 @@ Full charter: [docs/01_project_charter_brd.md](docs/01_project_charter_brd.md).
 
 **I had to fix the judge before I could fix Mira.** On the baseline, the Correctness judge (gpt-4.1) agreed with my review on only 10 of 17 tests (59%), because it passed answers that were missing required items. I rebuilt it five times, adding a rubric, numbered criteria and then evidence quotes, and froze it at 96% agreement. Until then, its scores told me nothing about Mira.
 
+**A stronger judge gave better reasons, not a different score.** I chose gpt-4.1 as the judge because I believed it was stronger than the agents' models. It isn't a reasoning model, so as a side test I re-judged the final-1 answers with one (gpt-5.6-luna), without re-running Mira. Both judges agreed with my verdict on 15 of 17 tests. gpt-4.1 failed T13 because it said the task IDs were missing, which was wrong. gpt-5.6-luna also failed T13, for a stricter reason: the answer doesn't say which task is blocked and which is overdue. Two judges failing the same test tells me the T13 criteria need to be clearer. On T12 it caught something gpt-4.1 and I both missed: Mira's email gave a reason for T006 being late ("ongoing analysis challenges") that isn't in the data. Results: [judge-test/](judge-test/).
+
 **Most failures were reasoning, not data.** The tools returned the right facts, but gpt-4o-mini still called a task due today "due soon", dropped a Blocked task, and contradicted its own risk table in the summary. gpt-4o fixed all three.
 
 **Routing prompts were fragile.** Three edits to the Orchestrator each fixed one test and broke another. I went back to the original prompt and handled the remaining cases in code.
@@ -557,6 +559,7 @@ Next, I would:
 4. **bring** Risk and Status back under $0.01 per request, e.g. by trimming tool output
 5. **add** conversation memory for follow-up questions
 6. **add** at least two more stakeholder email tests (e.g. another audience, a sprint with no overdue work) and give the email capability its own metric
+7. **switch** the judges to a reasoning model, make the T13 criteria clearer, and stop the Stakeholder agent from giving reasons that aren't in the data
 
 ### Evaluation and fine-tuning
 The evaluation set, with human verdicts across 3 final runs, is a labelled dataset. I chose **not** to fine-tune: every failure was fixed faster with a prompt, code or a model change, and 17 examples would overfit. Fine-tuning becomes worthwhile after the pilot. PM-corrected outputs, such as emails declined and redrafted in Slack, could train the Stakeholder agent or the Planner, and the same eval workflow would show whether it helps before release.
@@ -595,6 +598,7 @@ Human approval stays on for every client-facing message in all stages.
 | [docs/](docs/) | 01 Charter / BRD · 02 PRD · 03 Ground truth · 04 Metrics · 05 Metric implementation + cost · 06 Change log |
 | [baseline-v1/](baseline-v1/) | Mira before any fix: workflow exports, prompts, code, baseline results with human review |
 | [final-v1/](final-v1/) | Mira as frozen for the final runs: exports, prompts, code, models, 3 final runs with human review, and the full results sheet (`mira_eval_results.xlsx`) |
+| [judge-test/](judge-test/) | Side test: final-1 answers re-judged by gpt-5.6-luna (CSV + review page) |
 | [prompts/](prompts/) | Every prompt version (judges, Orchestrator, agents), old versions kept |
 | [data/](data/) | Answer key (`ground_truth.json`), my config, eval dataset, final judge criteria. Every run's results are in the [results xlsx](final-v1/mira_eval_results.xlsx) |
 | [scripts/](scripts/) | `json_to_csv.py` (ground truth → dataset) · `build_review.py` (results → HTML review page) · `extract_workflows.py` (exports → prompts, code, models) |
