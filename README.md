@@ -106,6 +106,19 @@ Each request Mira gets is one type: a plan, a risk question, a status report or 
 
 At first the Orchestrator made every routing decision itself. During evaluation, fixing one routing case in its prompt kept breaking another, so I moved two decisions into code. A request that names the active project always goes through, since Mira has its data. A vague request gets a fixed list of clarifying questions. Details: [PRD §4.5](docs/02_prd.md).
 
+#### Source data
+
+Mira works from the 4 data files that came with the assignment (course `Resources/` folder), used unchanged:
+
+| File | What it holds |
+|---|---|
+| `project_description.txt` | The ABCDE Ltd AI adoption project: goals, business areas, approach |
+| `project_timeline.csv` | 8 phases over 24 weeks, with key activities, milestones and deliverables |
+| `project_risks.csv` | Risk register R01–R10 (category, risk, impact, mitigation) |
+| `sample_task_board.csv` | 25 tasks T001–T025 (sprint, owner, status, priority, due date) |
+
+I stored copies in a Google Drive folder, [**Mira Project Files**](https://drive.google.com/drive/folders/1ReOQqjBqKNWq7hK-QW2ZZjTTwHMBMQ2P?usp=sharing) (view only). Its **Mira Reports** subfolder holds the Google Docs Mira saved (plans, risk assessments, status reports). I added `_mira` to some file names only to tell my copies apart; the contents are unchanged. My own addition is [`mira_config.json`](data/mira_config.json) (see below). The 12 brief test inputs come from the assignment's `eval_mira_inputs.txt` (see §2.5).
+
 #### Tools: code calculates, the LLM explains
 
 I decided early that the LLMs would never count, compare dates or read the files themselves. Each agent calls tools in **Mira Tools**. There, code reads the project files and my `mira_config.json`, parses the CSV fields, does the calculations and returns a small JSON result. The agent only explains it. That keeps numbers exact and every claim traceable to a task or risk ID. The trade-off is that the data files must keep a fixed format (column names, date format). Details: [PRD §4.3](docs/02_prd.md). I used AI (Claude Opus 5.5) to write the JavaScript in all the Code nodes. I set the rules for each tool (what to count, filter and return), then tested every tool against the data files. All the code is in [final-v1/n8n_code/](final-v1/n8n_code/).
