@@ -92,12 +92,13 @@ Metric definitions are in [04 Evaluation metrics](04_evaluation_metrics.md).
 
 ## 8. Timeline (build programme)
 
-| Week | Phase | Milestone |
-|---|---|---|
-| 1 | Define | Charter, PRD, ground truth, metrics signed off (this document set) |
-| 2 | Build core | Data files in Google Drive, `Mira Tools` workflow, Orchestrator, Planner, Risk, Status agents |
-| 3 | Build extended + evaluate | Stakeholder agent with Slack approval, tracing, evaluation workflow, 17-test baseline run |
-| 4 | Pilot + iterate | 2-PM pilot, fixes from trace findings, final write-up and GitHub submission |
+| Week | Dates | Phase | What I did |
+|---|---|---|---|
+| 1 | Oct 13–19 | Define | Charter, PRD, ground truth, metrics; design revised to 4 agents; Langfuse connection tested |
+| 2 | Oct 20–26 | Build | Source files in Google Drive, `Mira Tools`, Orchestrator, Planner, Risk, Status, Stakeholder agent with Slack approval, Monday report; reworked after the instructor's Oct 25 changes |
+| 3 | Oct 27–30 | Evaluate, fix, write up | Eval workflow and 17-test baseline (7/17); one change at a time to 17/17; 3 final runs; judge side test; README, docs and GitHub |
+
+> *Pilot (hypothetical):* a 2-PM pilot is part of the proposed rollout ([§11](#11-rollout-plan), stage 1). It was not run in this capstone.
 
 ## 9. Risks and constraints
 
