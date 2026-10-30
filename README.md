@@ -520,7 +520,7 @@ Plan and email requests meet the charter target (< $0.01). Risk and status reque
 
 Full charter: [docs/01_project_charter_brd.md](docs/01_project_charter_brd.md).
 
-- **Vision:** Mira turns raw project data into ready-to-use, standardized PM artifacts in minutes. Every statement traces back to the source data.
+- **Vision:** I will build an AI Project Assistant that helps Nexora's PMs and TPMs turn raw project data into ready-to-use, standardized plans, risk assessments and status reports in minutes. Every statement it makes traces back to the source data, and it warns PMs before milestones slip.
 - **Scope (v1):** one active project; plan, risk and status (core); stakeholder updates with Slack approval (extended); tracing and evaluation. Out of scope: live Jira/Trello sync, portfolio views, fine-tuning.
 - **Success criteria:** SC1–SC3 (the 3 metrics), SC4 (12/12 brief tests, human verdict), SC5 (cost per request < $0.01), SC6 (pilot satisfaction ≥ 4/5).
 - **Stakeholders:** CTO (sponsor), 10 PMs/TPMs (users), engineering leads, ABCDE Ltd stakeholders, security/legal.

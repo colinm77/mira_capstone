@@ -1,9 +1,9 @@
 # 01 — Project Charter / Business Requirements (BRD)
 
-**Project:** Mira — AI-Powered Project Intelligence Assistant
+**Project:** AI Project Assistant (the course brief calls it "Mira — AI-Powered Project Intelligence Assistant")
 **Sponsor:** CTO, Nexora Pvt. Ltd.
 **Owner:** AI PM/TPM (author)
-**Status:** Draft v0.1 for review
+**Status:** Final v1.0
 
 ---
 
@@ -29,7 +29,7 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 
 ## 3. Vision
 
-> Mira turns raw project data into ready-to-use, standardized PM artifacts in minutes. Every statement traces back to the source data, and Mira warns PMs before milestones slip.
+> I will build an AI Project Assistant that helps Nexora's PMs and TPMs turn raw project data into ready-to-use, standardized plans, risk assessments and status reports in minutes. Every statement it makes traces back to the source data, and it warns PMs before milestones slip.
 
 ## 4. Business objectives
 
@@ -37,7 +37,7 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 |---|---|---|
 | BO1 | Cut time to produce a first-draft project plan | 3–4 hrs → ≤ 30 min (incl. PM review) |
 | BO2 | Cut time to produce a weekly status report | 1–2 hrs → ≤ 15 min |
-| BO3 | Standardize artifacts across projects | 100% of Mira outputs follow the defined templates |
+| BO3 | Standardize artifacts across projects | 100% of the assistant's outputs follow the defined templates |
 | BO4 | Surface at-risk milestones before they are missed | At-risk items flagged on request, including tasks due within 7 days |
 | BO5 | Trustworthy output | 0 fabricated tasks, risks or milestones in evaluation |
 
@@ -47,17 +47,17 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 - One active project's data: the ABCDE Ltd AI Adoption Project files.
 - Core capabilities: plan, risk, status.
 - One extended capability: stakeholder updates, with PM approval in Slack. The Planner also includes a short "Key risks" section.
-- Chat/Slack interface, Langfuse tracing, n8n evaluation workflow against the 12 baseline tests plus T13.
-- Data read from the original resource files (unchanged) in Google Drive; Mira's settings and mitigation links in a separate config file.
+- Chat/Slack interface, Langfuse tracing, n8n evaluation workflow against 17 tests (12 from the brief plus T13–T17).
+- Data read from the original resource files (unchanged) in Google Drive; the assistant's settings and mitigation links in a separate config file.
 - The three core outputs (project plan, risk assessment, weekly status report) are also saved to a Google Doc.
 - The weekly status report is also sent automatically every Monday (Google Doc + Slack post).
 
 **Out of scope (v1, candidates for phase 2)**
-- Live Jira/Trello API sync. v1 reads the task board from Google Sheets.
+- Live Jira/Trello API sync. v1 reads the task board from a CSV file in Google Drive.
 - Multi-project portfolio views.
 - Fine-tuning, and RAG over large document sets.
 - Scheduled (proactive) milestone alerts, Resource Allocation Advisor and Competitive Analysis.
-- Writing back to task boards (Mira is read-only).
+- Writing back to task boards (the assistant is read-only).
 
 ## 6. Stakeholders
 
@@ -89,8 +89,8 @@ Metric definitions are in [04 Evaluation metrics](04_evaluation_metrics.md).
 | Week | Phase | Milestone |
 |---|---|---|
 | 1 | Define | Charter, PRD, ground truth, metrics signed off (this document set) |
-| 2 | Build core | Data in Sheets, Mira Tools workflow, Orchestrator, Planner, Risk, Status agents |
-| 3 | Build extended + evaluate | Stakeholder agent with Slack approval, tracing, evaluation workflow, 12-test baseline run |
+| 2 | Build core | Data files in Google Drive, `Mira Tools` workflow, Orchestrator, Planner, Risk, Status agents |
+| 3 | Build extended + evaluate | Stakeholder agent with Slack approval, tracing, evaluation workflow, 17-test baseline run |
 | 4 | Pilot + iterate | 2-PM pilot, fixes from trace findings, final write-up and GitHub submission |
 
 ## 9. Risks and constraints
@@ -102,7 +102,7 @@ Metric definitions are in [04 Evaluation metrics](04_evaluation_metrics.md).
 | LLM fabricates tasks, risks or numbers | Med | High | Tools do the math; Orchestrator asks for details on vague input; groundedness evaluation before rollout |
 | Client data sent to third-party LLM | Med | High | Use vendor API with no-training terms; send only the needed columns; legal review before rollout |
 | PMs don't trust or adopt outputs | Med | High | Citations to task/risk IDs; human approval for external comms; pilot with champions |
-| Source data quality issues | High | Med | Documented discrepancies; Mira reports the data as-is and flags conflicts |
+| Source data quality issues | High | Med | Documented discrepancies; the assistant reports the data as-is and flags conflicts |
 
 **Constraints:** low-code platform (n8n), capstone timebox of about 4 weeks, read-only data access. Technical assumptions (reference dates, source of truth) are in the [PRD §7](02_prd.md).
 
@@ -110,7 +110,7 @@ Metric definitions are in [04 Evaluation metrics](04_evaluation_metrics.md).
 
 - **Scope or architecture changes:** AI PM decides and informs the CTO. Changes that affect cost or vendor need CTO approval.
 - **Go/no-go for rollout:** CTO approves, based on SC1–SC5 evaluation results and the security/legal sign-off.
-- **Prompt and model changes:** every change is re-run against the 12-test evaluation set. No regression is allowed on SC1–SC3.
+- **Prompt and model changes:** every change is re-run against the 17-test evaluation set. No regression is allowed on SC1–SC3.
 - **Cadence:** weekly 30-min review of evaluation results and trace findings.
 
 ## 11. Rollout plan
@@ -119,7 +119,7 @@ Metric definitions are in [04 Evaluation metrics](04_evaluation_metrics.md).
 
 | Stage | Who | Exit criteria |
 |---|---|---|
-| 0. Internal test | AI PM | SC1–SC5 met on baseline |
+| 0. Internal test | AI PM | SC1–SC4 met on the final runs; SC5 met for plan and email, just over for risk and status (≈ $0.011) |
 | 1. Pilot | 2 PMs, 1 project each, 2 weeks | No critical errors; SC6 ≥ 4/5 |
 | 2. Expand | All 10 PMs/TPMs | Onboarding guide, Slack channel, office hours |
 | 3. Operate | All | Weekly eval re-runs, monthly cost review, feedback backlog |
