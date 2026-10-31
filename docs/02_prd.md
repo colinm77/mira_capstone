@@ -180,11 +180,11 @@ All six tools live in **one n8n workflow, "Mira Tools"**. Each agent attaches on
 | `get_upcoming_milestones` | none (uses `milestone_window_days` from `mira_config.json`) | milestones due in the next `milestone_window_days` |
 | `get_risks` | none | risks R01–R10 with mitigation tasks, link strength, coverage status, tier and rank (§6.4) |
 
-**No project facts in code.** The four original resource files are read **unchanged**. My additions live in a separate config file, **`mira_config.json`**, in the same Drive folder:
+**Design decision: the code stays generic, so the assistant can work on other projects.** Nothing in the tool code is specific to ABCDE Ltd: no dates, no current sprint, no list of which tasks mitigate which risk. Those live in my own file, `mira_config.json`, stored in the same Drive folder as the four original files (which I left unchanged):
 - **Settings:** `as_of_date`, `project_start`, `current_sprint`, `due_soon_days`, `milestone_window_days`
 - **Mitigation links:** `risk_mitigation` (tasks + link strength per risk, §6.4)
 
-The **Load settings** Code node passes the config to every tool. To use the assistant on another project, change the files, not the code.
+The **Load settings** Code node passes the config to every tool. For a new project, swap the data files and the config; the code doesn't change. Two places still name the project and would need editing: the Orchestrator prompt (the active project) and the active-project guard, which checks for "abcde" in an If node (§4.5). See also §5.2, "Project facts".
 
 **How a tool call reads the data (no LLM in the path):**
 1. **Call.** The agent calls a tool (e.g. `get_tasks` with `sprint = "Sprint 3"`) through its Call n8n Workflow Tool node. That runs Mira Tools with the tool name and inputs.
