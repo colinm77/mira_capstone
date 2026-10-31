@@ -173,12 +173,12 @@ All six tools live in **one n8n workflow, "Mira Tools"**. Each agent attaches on
 
 | Tool | Parameters | Returns |
 |---|---|---|
-| `get_description` | — | project description text |
-| `get_timeline` | — | 8 phases with weeks converted to dates |
-| `get_tasks` | `sprint?`, `status?` (filled in by the agent) | matching task rows **plus exact counts by status** (Done, In Progress, Blocked, To Do, total) |
-| `get_overdue_or_blocked` | — (as of 2026-04-28, 7-day window) | blocked, overdue and due-soon tasks, each with a reason |
-| `get_upcoming_milestones` | — (window from `settings`) | milestones due in the next `milestone_window_days` |
-| `get_risks` | — | risks R01–R10 with mitigation tasks, link strength, coverage status, tier and rank (§6.4) |
+| `get_description` | none | project description text |
+| `get_timeline` | none | 8 phases with weeks converted to dates |
+| `get_tasks` | `sprint` and `status`, both optional (the agent fills them in) | matching task rows **plus exact counts by status** (Done, In Progress, Blocked, To Do, total) |
+| `get_overdue_or_blocked` | none (uses the as-of date 2026-04-28 and the 7-day window from `mira_config.json`) | blocked, overdue and due-soon tasks, each with a reason |
+| `get_upcoming_milestones` | none (uses `milestone_window_days` from `mira_config.json`) | milestones due in the next `milestone_window_days` |
+| `get_risks` | none | risks R01–R10 with mitigation tasks, link strength, coverage status, tier and rank (§6.4) |
 
 **No project facts in code.** The four original resource files are read **unchanged**. My additions live in a separate config file, **`mira_config.json`**, in the same Drive folder:
 - **Settings:** `as_of_date`, `project_start`, `current_sprint`, `due_soon_days`, `milestone_window_days`
