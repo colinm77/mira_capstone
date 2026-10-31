@@ -112,7 +112,9 @@ flowchart TD
 
 *Purple = core agent. Green = extended capability (Stakeholder + PM approval). Data files live in the Google Drive folder `Mira Project Files`; the four originals are unchanged. Plans, risk assessments and weekly status reports are also saved to a Google Doc. Langfuse traces every LLM and tool call (tokens, cost).*
 
-### 4.2 Agent and tool map (least-privilege)
+### 4.2 Agents and their tools (each gets only what it needs)
+
+This section lists the assistant's agents: the model each one runs on, the data tools it can call, and the output it produces. Each agent is connected only to the tools its job needs (in security terms, *least privilege*). For example, the Planner can't see the task board, and the Stakeholder agent can't see the risk register. This keeps the data each agent sees to a minimum (NFR5), stops an agent from pulling in data outside its job, and makes its tool calls predictable in the traces.
 
 **Core vs extended.** The brief requires plan, risk and status (core) and at least one extended capability. The assistant includes **one** extended capability: the **Stakeholder** agent (the brief's "Stakeholder Update Generator").
 
@@ -129,9 +131,8 @@ Questions about blocked tasks and upcoming milestones (T8, T11) are handled by t
 ### 4.3 Tool sub-workflows (deterministic)
 
 **Core design principle: code calculates, the LLM explains.**
-- **The LLM reads data**, but only what the tools return: task rows, risk rows, the description, timeline phases. It uses them to write plans, reports and emails.
-- **The LLM never fetches data itself.** It can't open the files; it only sees tool results.
-- **The LLM never calculates anything that must be exact:** counts, dates, overdue / due soon, risk tiers, milestone status. Code does that and hands the LLM the result.
+- **Code does the data work.** It reads and parses the files, does every calculation that must be exact (counts, dates, overdue or due soon, risk tiers, upcoming milestones) and returns only the result needed. For example, it returns just the blocked and overdue tasks, not the whole 25-task board. The short files (description, timeline, risk register) come back whole, but already parsed and with the calculated fields added.
+- **The LLM does the language work.** It decides which tools to call, and with which filter (e.g. Sprint 3). It then turns the results into plans, risk assessments, status reports and emails: explaining what the results mean and suggesting actions.
 
 This is what keeps the assistant grounded: numbers and dates come from code, words come from the LLM.
 
