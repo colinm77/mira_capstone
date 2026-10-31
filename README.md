@@ -366,7 +366,7 @@ Mira never sends on its own. The draft goes to the PM in Slack with **Approve** 
 
 I wired Mira to **Langfuse** so I could see how each request was handled: chat, the Monday schedule and eval runs. A trace shows the Orchestrator's routing decision, which agent ran, each tool call, timings and an estimated cost. Eval traces carry the test ID, so I could follow a failing test step by step.
 
-Langfuse is for observability only, not evaluation. Scoring happens in n8n, and the results go to the Google Sheet (§2.5). In practice the sheet also showed each test's path next to its scores, so I did most debugging there. One limit: Langfuse estimates tokens from text length, so its cost is an estimate. The actual cost comes from OpenAI usage ([doc 05 B5](docs/05_metric_implementation_and_cost.md)).
+Langfuse is for observability only, not evaluation. Scoring happens in n8n, and the results go to the Google Sheet (§2.5). In practice the sheet also showed each test's path next to its scores, so I did most debugging there. One limit: Langfuse's cost figure is rough. The trace estimates tokens from text length, which is close, but it labels every call as gpt-4o-mini, so risk and status requests (gpt-4o) look far too cheap. The actual cost comes from OpenAI usage ([doc 05 B5](docs/05_metric_implementation_and_cost.md)).
 
 #### Trace tree (T7)
 
@@ -501,6 +501,8 @@ For cost, I used actual token counts from the OpenAI usage export, not Langfuse'
 
 *These are averages per model over all calls that day, so a long plan uses more output tokens than a short answer. Input is mostly the system prompt, the tool definitions and the tool results; output is small. The exact tokens of any single request are shown in the n8n execution (each OpenAI Chat Model node reports its token usage).*
 
+**Cost per plan, measured:** the brief asks for cost per plan, so I measured one directly. On T1, n8n's token counts were 834 in and 25 out for the Orchestrator, and 2,932 in and 651 out for the Planner. At gpt-4o-mini prices that's $0.00097, which matches the ≈ $0.001 worked out from the day's averages.
+
 Judging was the bulk of my spend, because I ran the evaluation so many times. One run costs only about $0.21, but every change meant re-judging all 17 tests. On the day of the final runs I judged about **28 runs' worth** (942 calls). That made the gpt-4.1 judges **$2.87 of the day's $3.47 (83%)**; gpt-4o cost $0.42 and gpt-4o-mini $0.18. I accepted this cost because I chose gpt-4.1 as the judge believing it was stronger than the agents it grades. I later learned that, like gpt-4o, it is not a reasoning model, so it wasn't clearly a step up (see the side test in [§4](#what-i-learned-from-the-traces)). The fixed criteria are what made its scores trustworthy. PMs using Mira never pay this cost.
 
 Plan and email requests meet the charter target (< $0.01). Risk and status requests are just over it (about $0.011) since the gpt-4o upgrade. I accepted that trade for correct answers ([doc 05 B5](docs/05_metric_implementation_and_cost.md)).
@@ -567,10 +569,9 @@ Next, I would:
 **Reliability**
 1. add graceful error handling: if a tool, Google Drive or Slack call fails, reply with a clear message instead of stopping silently
 
-**Cost and speed**
-1. bring Risk and Status back under $0.01 per request, e.g. by trimming tool output
-2. download the project files once per request in Mira main, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of about 15 today, where each of an agent's 3 tool calls downloads all 5 files. On T1 this would save about 8 s of 30 s
-3. send real token counts and models to Langfuse
+**Speed and tracing**
+1. download the project files once per request in Mira main, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of about 15 today, where each of an agent's 3 tool calls downloads all 5 files. On T1 this would save about 8 s of 30 s
+2. label each call in the Langfuse trace with its real model, so its cost matches the OpenAI bill
 
 **New features**
 1. build a Slack chat app so PMs can ask the assistant from Slack instead of the n8n chat. Optionally, add conversation memory for each Slack thread, so follow-up questions like "and what about Sprint 4?" keep the context.
