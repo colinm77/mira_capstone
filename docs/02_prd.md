@@ -36,24 +36,55 @@
 
 ## 2. Functional requirements
 
-| ID | Requirement | Agent | Tests |
-|---|---|---|---|
-| FR1 | In one LLM step, classify each request into `plan`, `risk`, `status`, `stakeholder` or `unclear` **and** check that it has enough real data; return `{intent, sufficient, missing[], save_to_doc}` | Orchestrator | all |
-| FR2 | If `sufficient` is false (or intent is `unclear`), do not call an agent; reply with a fixed list of clarifying questions for that intent (§4.5) | Orchestrator → Clarify | T2, T4, T6, T9 |
-| FR3 | Generate a project plan with phases, key activities, milestones, deliverables, timeline and key risks. Use only goals stated in the description | Planner | T1, T14 |
-| FR4 | Generate a categorized risk matrix (category, risk, impact, mitigation, linked task signals) using only R01–R10 | Risk agent | T3, T13, T15 |
-| FR5 | Rank top-N risks using the documented ranking rule (§6.4) | Risk agent | T7 |
-| FR6 | Generate a weekly status report for a sprint: tasks by status, blockers, overdue items, upcoming milestones, overall health (RAG) | Status agent | T5, T10, T16 |
-| FR7 | Identify blocked and at-risk tasks (overdue, or due within 7 days and not Done) as of `AS_OF_DATE` | Status agent | T8 |
-| FR8 | List timeline milestones due within N weeks of `AS_OF_DATE`, by date only (the timeline has no milestone status; §6.4) | Status agent | T11 |
-| FR9 | Draft a stakeholder update for a given sprint and audience, using only that sprint's tasks | Stakeholder *(extended)* | T12, T17 |
-| FR10 | Send external communications only after the PM clicks **Approve** in Slack; on **Decline**, collect the PM's feedback and redraft (§6.6) | Stakeholder *(extended)* | — |
-| FR11 | Every output cites source IDs (T###, R##, phase #) | All agents | all |
-| FR12 | Return output in the fixed format defined in each agent's prompt ([Appendix](#appendix-system-prompts)) | All agents | all |
-| FR13 | Save the three core outputs (project plan, risk assessment, weekly status report) to a Google Doc in the `Mira Reports` folder and return the link in chat. Short answers (e.g. top 3 risks, task counts) stay chat-only | Orchestrator (`save_to_doc`) → Decide delivery → Mira Save Doc | T1, T3, T5 |
-| FR14 | Read project data from the original resource files, unchanged; keep the assistant's own settings and mitigation links in a separate config file | Mira Tools | all |
-| FR15 *(not built; phase 2)* | Suggest mitigation links: on request ("Suggest mitigation links"), propose risk→task links with strength and reason for unmapped risks or new tasks; the PM approves or edits in Slack before they are saved to `mira_config.json`. If a risk has no approved mapping, `get_risks` flags it and any AI suggestion is labelled "not approved" and never affects ranking | Mitigation suggester | match rate vs PM mapping |
-| FR16 | Send the weekly status report automatically every Monday at 09:00 for the `current_sprint` in `mira_config.json`: save it to a Google Doc and post a short summary + Doc link to a Slack channel | Schedule Trigger → same flow as chat (Orchestrator → Status) | manual check |
+**Routing (Orchestrator)**
+
+| ID | Requirement | Tests |
+|---|---|---|
+| FR1 | In one LLM call, decide the intent (`plan`, `risk`, `status`, `stakeholder`, `unclear`), whether there's enough data, and whether to save a Doc: `{intent, sufficient, missing[], save_to_doc}` | all |
+| FR2 | If there isn't enough data, don't call an agent: Clarify asks a fixed list of questions for that intent (§4.5) | T2, T4, T6, T9 |
+
+**Plan (Planner)**
+
+| ID | Requirement | Tests |
+|---|---|---|
+| FR3 | A plan with phases, activities, milestones, deliverables, timeline and key risks; only goals stated in the description | T1, T14 |
+
+**Risk (Risk agent)**
+
+| ID | Requirement | Tests |
+|---|---|---|
+| FR4 | A risk matrix (category, risk, impact, mitigation, live task signals) using only R01–R10 | T3, T13, T15 |
+| FR5 | Top-N risks ranked by the fixed tier rule (§6.4) | T7 |
+
+**Status (Status agent)**
+
+| ID | Requirement | Tests |
+|---|---|---|
+| FR6 | A weekly sprint report: tasks by status, blockers, overdue items, upcoming milestones, health (RAG) | T5, T10, T16 |
+| FR7 | Blocked and at-risk tasks (overdue, or due within 7 days and not Done) as of the as-of date | T8 |
+| FR8 | Milestones due in the next N weeks, by date only (the timeline has no milestone status) | T11 |
+
+**Stakeholder email (extended)**
+
+| ID | Requirement | Tests |
+|---|---|---|
+| FR9 | A sprint update for an audience, using only that sprint's tasks | T12, T17 |
+| FR10 | Send only after the PM clicks **Approve** in Slack; on **Decline**, take the PM's feedback and redraft (§6.6) | — |
+
+**Delivery**
+
+| ID | Requirement | Tests |
+|---|---|---|
+| FR13 | Save the plan, risk assessment and weekly report as a Google Doc in `Mira Reports`, with the link in chat; short answers stay in chat | T1, T3, T5 |
+| FR16 | Every Monday at 09:00, create the weekly report for the current sprint, save it as a Doc and post a summary + link to Slack | manual check |
+
+**All agents and data**
+
+| ID | Requirement | Tests |
+|---|---|---|
+| FR11 | Every output cites source IDs (T###, R##, phase #) | all |
+| FR12 | Every output follows the format in its prompt ([Appendix](#appendix-system-prompts)) | all |
+| FR14 | Read the original files unchanged; my settings and mitigation links in `mira_config.json` | all |
 
 ## 3. Non-functional requirements
 
