@@ -314,7 +314,7 @@ Every Monday at 09:00, the **Every Monday 9am** trigger sends a fixed request ("
 
 For the extended capability I chose stakeholder update emails, with a PM approval step built in. Emails go to people outside the team, so a PM must review each one before it is sent. The Stakeholder agent drafts a sprint update covering only that sprint's tasks. It flags anything overdue or blocked, with a plan to close it.
 
-Mira never sends on its own. The draft goes to the PM in Slack with **Approve** and **Decline** buttons. Approve sends it through Gmail. Decline asks what to change, and Mira redrafts without adding new facts, then asks again. Evaluation runs skip Slack entirely. In my runs, Gmail sent each approved email to my own inbox (screenshots below). For privacy, the recipient in the published export is replaced with `pm@example.com`. Tested by T12 (Sprint 2 email) and T17 (no sprint named, so Mira asks which one). Details: [PRD §6.7](docs/02_prd.md).
+Mira never sends on its own. The draft goes to the PM in Slack with **Approve** and **Decline** buttons. Approve sends it through Gmail. Decline asks what to change, and Mira redrafts without adding new facts, then asks again. Evaluation runs skip Slack entirely. In my runs, Gmail sent each approved email to my own inbox (screenshots below). For privacy, the recipient in the published export is replaced with `pm@example.com`. Tested by T12 (Sprint 2 email) and T17 (no sprint named, so Mira asks which one). Details: [PRD §6.6](docs/02_prd.md#66-human-in-the-loop).
 
 #### Approve flow (T12)
 

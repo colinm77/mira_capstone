@@ -47,7 +47,7 @@ Metrics are averages of the LLM judge scores (doc 04). Human counts and agreemen
 | Status report missing task names, extra sections, no "due in X days" reason | T5, T8 | step 8 |
 | Status counts the current sprint instead of the whole project | T10 | step 8 |
 
-**Drift found while freezing:** the Risk agent prompt in n8n is older than the one in PRD §6.6. It has no mitigation-coverage output format, which may explain T13. The n8n version is the one recorded in `baseline-v1/prompts/`.
+**Drift found while freezing:** the Risk agent prompt in n8n is older than the one in the PRD prompt appendix. It has no mitigation-coverage output format, which may explain T13. The n8n version is the one recorded in `baseline-v1/prompts/`.
 
 ## Changes
 
@@ -110,9 +110,9 @@ Metrics are averages of the LLM judge scores (doc 04). Human counts and agreemen
 | | |
 |---|---|
 | **Component** | Mira main → Risk agent system prompt |
-| **Why** | T3, T7: live signals shown by task name without the ID. T13: the n8n prompt was an old version with no mitigation-coverage format (drift from PRD §6.6). T15: answered a vague "no project data" instead of saying the register has no likelihood scores |
+| **Why** | T3, T7: live signals shown by task name without the ID. T13: the n8n prompt was an old version with no mitigation-coverage format (drift from PRD prompt appendix). T15: answered a vague "no project data" instead of saying the register has no likelihood scores |
 | **Before** | `prompts/risk_agent_v1.txt` (= `baseline-v1/prompts/risk_agent.txt`) |
-| **After** | `prompts/risk_agent_v2.txt` = the PRD §6.6 version (adds the coverage output and coverage fields) + 2 rules: cite tasks by ID and name with the signal; for a field the register doesn't have, say so and give what it has |
+| **After** | `prompts/risk_agent_v2.txt` = the PRD prompt appendix version (adds the coverage output and coverage fields) + 2 rules: cite tasks by ID and name with the signal; for a field the register doesn't have, say so and give what it has |
 | **Test** | Full run (Mira + frozen judge v5), all 17 tests → `run-2` |
 | **Target** | T3, T7, T13, T15 pass; no other test gets worse |
 | **Result** | Partial. T3, T7: task IDs now shown ✅. T13: coverage table now produced, but still says R02, R04, R07, R08, R10 have no tasks, although get_risks returns them as "Covered, on track" (groundedness 0.6). T15: now says the register has no likelihood score ✅, but called **no tools**, so R05 details are "[not specified]" (groundedness 0). Regression not caused by this change: T16 (Status, prompt unchanged) invented a Sprint 42 report; Mira's answers vary between runs (agent temperature not set) |
