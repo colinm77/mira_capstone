@@ -268,15 +268,15 @@ I chose this over n8n's Text Classifier node followed by a separate sufficiency 
 
 | Intent | Description given to the Orchestrator | Example |
 |---|---|---|
-| `plan` | Create or outline a project plan, phases, schedule | T1, T2, T9 |
-| `risk` | Risks, risk matrix, top risks, mitigations | T3, T4, T7 |
-| `status` | Status report, progress summary, task counts, blocked/overdue/at-risk tasks, upcoming milestones | T5, T6, T8, T10, T11 |
-| `stakeholder` | Email/update/summary for stakeholders or an audience | T12 |
+| `plan` | Create or outline a project plan, phases, schedule | T1, T2, T9, T14 |
+| `risk` | Risks, risk matrix, top risks, mitigations | T3, T4, T7, T13, T15 |
+| `status` | Status report, progress summary, task counts, blocked/overdue/at-risk tasks, upcoming milestones | T5, T6, T8, T10, T11, T16 |
+| `stakeholder` | Email/update/summary for stakeholders or an audience | T12, T17 |
 | `unclear` | None of the above | → ask user |
 
 ### 6.2 Sufficiency rules (part of the Orchestrator prompt)
 
-Mira has one active project in context, set once in the Orchestrator prompt (currently ABCDE Ltd). The agent prompts don't name the project; they get it from the data. The Orchestrator returns `sufficient = true` only if one of these is true:
+The assistant has one active project in context, set once in the Orchestrator prompt (currently ABCDE Ltd). The agent prompts don't name the project; they get it from the data. The Orchestrator returns `sufficient = true` only if one of these is true:
 
 1. The request **refers to the active project or its data**: "ABCDE", "the project description", "task board", "Sprint N", "timeline", "risk data".
 2. The request **describes a new project with enough detail**:
@@ -284,9 +284,9 @@ Mira has one active project in context, set once in the Orchestrator prompt (cur
    - **risk:** domain and scope.
    - **status:** task data.
 
-Otherwise it returns `sufficient = false`, and Mira replies with clarifying questions. The Clarify Code node asks for a fixed list per intent (§4.5, CHG-12). Final behaviour:
+Otherwise it returns `sufficient = false`, and the assistant replies with clarifying questions. The Clarify Code node asks for a fixed list per intent (§4.5, CHG-12). Final behaviour:
 
-| Test | Input | `sufficient` | Mira asks for |
+| Test | Input | `sufficient` | Asks for |
 |---|---|---|---|
 | T2 | "We want to build a chatbot." | false | scope, goals, timeline, deliverables, team size |
 | T4 | "New project starting soon." | false | domain, scope, goals, timeline, team/technology |
@@ -303,14 +303,14 @@ Otherwise it returns `sufficient = false`, and Mira replies with clarifying ques
 
 ### 6.4 Risk register, mitigation coverage and ranking
 
-The risk register (`project_risks.csv`) has no likelihood/severity scores, so Mira uses **live evidence from the task board**. Each risk lists its **mitigation tasks**: the work the team is doing to reduce that risk. This mirrors real practice, where a risk register links each risk to its mitigation actions and their tickets.
+The risk register (`project_risks_mira.csv`) has no likelihood/severity scores, so the assistant uses **live evidence from the task board**. Each risk lists its **mitigation tasks**: the work the team is doing to reduce that risk. This mirrors real practice, where a risk register links each risk to its mitigation actions and their tickets.
 
 **Code decides, not the LLM.** The `get_risks` tool (Mira Tools, Code node) computes every signal, coverage status, tier and rank. The Risk agent and Planner only explain the result. Why:
 - **Consistent:** the same data always gives the same answer. An LLM could rank differently on each run.
 - **Explainable:** every result traces back to a named task and date.
 - **Testable:** T7 and T13 each have one correct answer.
 
-**Mitigation links added for Mira** (in `mira_config.json` → `risk_mitigation`, maintained by the PM, not in code; the original `project_risks.csv` is unchanged):
+**Mitigation links I added** (in `mira_config.json` → `risk_mitigation`, maintained by the PM, not in code; the original `project_risks_mira.csv` is unchanged):
 
 | Field | Example | Meaning |
 |---|---|---|
@@ -361,15 +361,16 @@ The risk register (`project_risks.csv`) has no likelihood/severity scores, so Mi
 - **Top 3:** R09 (T024 Blocked), R01 (T006 overdue), R05 (T025 In Progress, due today).
 - **Coverage:** mitigation at risk = R01, R09; weak coverage = R03, R06; covered, on track = R02, R04, R05, R07, R08, R10; no mitigation = none.
 
-**Milestones** (`get_upcoming_milestones`): a milestone is due on its phase end date. The tool lists milestones due within `milestone_window_days` of `as_of_date`. The timeline has no milestone status column, so Mira does not judge whether a milestone is complete; overdue *tasks* are flagged by `get_overdue_or_blocked` instead.
+**Milestones** (`get_upcoming_milestones`): a milestone is due on its phase end date. The tool lists milestones due within `milestone_window_days` of `as_of_date`. The timeline has no milestone status column, so the assistant does not judge whether a milestone is complete; overdue *tasks* are flagged by `get_overdue_or_blocked` instead.
 
 ### 6.5 Output templates (abridged)
 
-- **Plan:** Overview → Goals (quoted from description) → Phases table (phase, weeks, dates, activities, milestones/deliverables) → Key risks (IDs) → Assumptions and open questions.
-- **Risk matrix:** table (ID, category, risk, impact, mitigation, live signal, rank tier) → Top risks summary.
-- **Status report:** Period and as-of date → Health (RAG + reason) → Counts → Completed → In progress → Blocked → Overdue/at risk → Upcoming milestones → Asks/decisions.
-- **At-risk / milestone list** (Status Reporter): item, due date, reason, suggested action, owner.
-- **Stakeholder email:** subject, 3-line summary, completed, in progress, risks/asks, next steps. Sprint-scoped.
+- **Plan:** Overview → Goals (quoted from description) → Phases table (phase, weeks, dates, activities, milestones/deliverables) → Key risks (IDs) → Open questions.
+- **Risk matrix:** table (ID, category, risk, impact, mitigation, live signal, tier) → Summary.
+- **Mitigation coverage:** table (risk ID, risk, mitigation tasks, link strength, coverage status) → summary grouped by coverage status.
+- **Status report:** Period and as-of date → Health (RAG + reason) → Counts → Completed → In progress → To do → Blocked → Overdue/at risk → Upcoming milestones → Asks/decisions.
+- **At-risk / milestone list** (Status agent): item, due date, reason, suggested action, owner.
+- **Stakeholder email:** subject, greeting, 2–3 sentence summary, completed, in progress, risks/asks, next steps. Sprint-scoped.
 
 **Health (RAG) rule:**
 - **Red:** any Blocked task in the current or next sprint.
@@ -630,7 +631,7 @@ The **Stakeholder agent (extended capability)** never sends an email on its own.
 
 1. Mira main replies in chat with the draft and hands it to the **Mira Stakeholder Approval** workflow without waiting. That workflow posts the draft to the PM in Slack using n8n's **"Send and Wait for Response"** node (approval type), with **Approve** and **Decline** buttons, and pauses until the PM clicks one.
 2. **Approve** → the email is sent (Gmail node).
-3. **Decline** → Mira asks the PM in Slack what to change. The PM replies with feedback, a **Redraft** step (one LLM call that edits the existing draft; no tools, so it can't add new facts) applies it, and the new draft goes back for approval.
+3. **Decline** → the approval workflow asks the PM in Slack what to change. The PM replies with feedback, a **Redraft** step (one LLM call that edits the existing draft; no tools, so it can't add new facts) applies it, and the new draft goes back for approval.
 4. **Guard ("Real draft" If node, first step of the approval workflow):** the draft goes to Slack only if it is a real email (it does not start with "UNKNOWN", the reply when no sprint is named, T17) **and** the request did not come from an evaluation run (`source` ≠ "eval"). So eval runs never post to Slack or send email. (Found and fixed during evaluation: the `source` field had not been published in this workflow, so eval runs posted approval requests to Slack. None were approved; see the change log.)
 5. **Evaluated by:** T12 (Sprint 2 email: right tasks, overdue T006 with a plan to close it, no other sprints) and T17 (no sprint named → asks which sprint, no draft).
 
@@ -639,9 +640,9 @@ Plans are marked "DRAFT — PM review required."
 ### 6.8 Scheduled weekly report
 
 1. A **Schedule Trigger** fires every **Monday at 09:00**.
-2. It creates the request *"Generate a weekly status report for <current_sprint>"* (sprint from `mira_config.json`).
-3. **Normalize request** gives both triggers the same shape: `message`, `session_id`, `source` (`chat` or `schedule`). All downstream nodes read the message from here, not from a trigger.
-4. The request goes through the **same flow** as chat: Orchestrator → Status agent → Save to Google Doc.
+2. It creates the fixed request *"Generate the weekly status report for the current sprint using the task board."* (the current sprint comes from `mira_config.json`).
+3. **Normalize request** gives both triggers the same shape: `message`, `session_id`, `source` (`chat`, `schedule` or `eval`). All downstream nodes read the message from here, not from a trigger.
+4. The request goes through the **same flow** as chat: Orchestrator → Status agent → Mira Save Doc.
 5. **Delivery depends on the source:** chat → reply in chat with the Doc link; schedule → post a 3-line summary + Doc link to the Slack channel `#mira-reports`.
 6. Not part of the 17 evaluation tests. Checked once by hand (run the schedule manually) and screenshotted for the write-up.
 
@@ -649,9 +650,9 @@ Plans are marked "DRAFT — PM review required."
 
 **Assumptions**
 - `AS_OF_DATE = 2026-04-28` (end of Sprint 3) and `PROJECT_START = 2026-03-30` (Week 1 Monday).
-- The original resource files (`project_description.txt`, `project_timeline.csv`, `project_risks.csv`, `sample_task_board.csv`) are the source of truth and are read unchanged. Where the problem statement and a CSV differ (e.g. Done count), the CSV wins.
-- The reference dates and mitigation links are Mira's own assumptions, kept in `mira_config.json`.
-- One OpenAI API key is available (gpt-4o-mini and gpt-4o for Mira, gpt-4.1 for the judges).
+- The original resource files (`project_description.txt`, `project_timeline_mira.csv`, `project_risks_mira.csv`, `sample_task_board_mira.csv`) are the source of truth and are read unchanged. Where the problem statement and a CSV differ (e.g. Done count), the CSV wins.
+- The reference dates and mitigation links are my own assumptions, kept in `mira_config.json`.
+- One OpenAI API key is available (gpt-4o-mini and gpt-4o for the agents, gpt-4.1 for the judges).
 
 **Known data issues (handled explicitly)**
 
@@ -660,5 +661,5 @@ Plans are marked "DRAFT — PM review required."
 | Problem statement says "3 Done"; CSV has 5 Done (T001–T005) | CSV is source of truth; ground truth uses 5 / 3 / 1 / 16 |
 | No current date in data | Fixed `AS_OF_DATE` |
 | Risk CSV has no likelihood/severity | Evidence-based ranking rule (§6.4) |
-| Task board ends 2026-08-04 (T023, Sprint 10); timeline Phase 8 ends 2026-09-13 | Status Reporter reports the mismatch instead of resolving it |
-| Phase 2 milestone "Gap analysis report" due 2026-04-26 but T006 still In Progress | Flagged as overdue milestone (expected behavior) |
+| Task board ends 2026-08-04 (T023, Sprint 10); timeline Phase 8 ends 2026-09-13 | The Status agent reports the mismatch instead of resolving it |
+| Phase 2 milestone "Gap analysis report" due 2026-04-26 but T006 still In Progress | T006 is flagged as an overdue task; milestones are listed by date only (§6.4) |

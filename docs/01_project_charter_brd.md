@@ -37,7 +37,7 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 |---|---|---|
 | BO1 | Cut time to produce a first-draft project plan | 3–4 hrs → ≤ 30 min (incl. PM review) |
 | BO2 | Cut time to produce a weekly status report | 1–2 hrs → ≤ 15 min |
-| BO3 | Standardize artifacts across projects | Every output uses the fixed format set in its agent's prompt ([prompts](../final-v1/prompts/)); checked by hand in the human review, and by the judge where a test's criteria include the format |
+| BO3 | Standardize artifacts across projects | Every output uses the fixed format set in its agent's prompt ([prompts](../final-v1/prompts/), summarized in [PRD §6.5](02_prd.md#65-output-templates-abridged)); checked by hand in the human review, and by the judge where a test's criteria include the format |
 | BO4 | Surface at-risk milestones before they are missed | At-risk items flagged on request, including tasks due within 7 days |
 | BO5 | Trustworthy output | 0 fabricated tasks, risks or milestones in evaluation |
 
