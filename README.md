@@ -553,17 +553,27 @@ I took Mira from 7/17 to 17/17 by making one change at a time, re-running all 17
 - **rebuilt** the Correctness judge so its scores could be trusted
 
 Next, I would:
-1. **swap in** gpt-5.6-luna as the judge for both Groundedness and Correctness. In the side test it gave better reasons and caught an error gpt-4.1 missed
-2. **make** the T13 criteria clearer, so the answer must say which mitigation task is blocked and which is overdue
-3. **stop** the Stakeholder agent from giving reasons that aren't in the data (T12)
-4. **add** a hold-out test set, since the judge and the fixes were tuned on the same 17 tests
-5. **add** a code check that flags any task or risk ID in an answer that isn't in the data, to back up the LLM judge
-6. **send** real token counts and models to Langfuse
-7. **bring** Risk and Status back under $0.01 per request, e.g. by trimming tool output
-8. **build** a Slack chat app so PMs can ask the assistant from Slack instead of the n8n chat. Optionally, add conversation memory for each Slack thread, so follow-up questions like "and what about Sprint 4?" keep the context.
-9. **add** at least two more stakeholder email tests (e.g. another audience, a sprint with no overdue work) and give the email capability its own metric
-10. **add** graceful error handling: if a tool, Google Drive or Slack call fails, reply with a clear message instead of stopping silently
-11. **download** the project files once per request in Mira main, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of about 15 today, where each of an agent's 3 tool calls downloads all 5 files. On T1 this would save about 8 s of 30 s
+
+**Answer quality**
+1. stop the Stakeholder agent from giving reasons that aren't in the data (T12)
+
+**Evaluation and judging**
+1. add a hold-out test set, since the judge and the fixes were tuned on the same 17 tests
+2. add a code check that flags any task or risk ID in an answer that isn't in the data, to back up the LLM judge
+3. swap in gpt-5.6-luna as the judge for both Groundedness and Correctness. In the side test it gave better reasons and caught an error gpt-4.1 missed
+4. add at least two more stakeholder email tests (e.g. another audience, a sprint with no overdue work) and give the email capability its own metric
+5. make the T13 criteria clearer, so the answer must say which mitigation task is blocked and which is overdue
+
+**Reliability**
+1. add graceful error handling: if a tool, Google Drive or Slack call fails, reply with a clear message instead of stopping silently
+
+**Cost and speed**
+1. bring Risk and Status back under $0.01 per request, e.g. by trimming tool output
+2. download the project files once per request in Mira main, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of about 15 today, where each of an agent's 3 tool calls downloads all 5 files. On T1 this would save about 8 s of 30 s
+3. send real token counts and models to Langfuse
+
+**New features**
+1. build a Slack chat app so PMs can ask the assistant from Slack instead of the n8n chat. Optionally, add conversation memory for each Slack thread, so follow-up questions like "and what about Sprint 4?" keep the context.
 
 ### Evaluation and fine-tuning
 The evaluation set, with human verdicts across 3 final runs, is a labelled dataset. I chose **not** to fine-tune: every failure was fixed faster with a prompt, code or a model change, and 17 examples would overfit. Fine-tuning becomes worthwhile after the pilot. PM-corrected outputs, such as emails declined and redrafted in Slack, could train the Stakeholder agent or the Planner, and the same eval workflow would show whether it helps before release.
