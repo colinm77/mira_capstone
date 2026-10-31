@@ -40,53 +40,53 @@ What the assistant must do, grouped by agent or job. Tests lists the tests that 
 
 **Routing (Orchestrator)**
 
-| What it must do | Tests | ID |
+| Requirement | Tests | ID |
 |---|---|---|
-| In one LLM call, decide the intent (`plan`, `risk`, `status`, `stakeholder`, `unclear`), whether there's enough data, and whether to save a Doc: `{intent, sufficient, missing[], save_to_doc}` | all | FR1 |
-| If there isn't enough data, don't call an agent: Clarify asks a fixed list of questions for that intent (§4.5) | T2, T4, T6, T9 | FR2 |
+| Decide, in one LLM call, the intent (`plan`, `risk`, `status`, `stakeholder`, `unclear`), whether there's enough data, and whether to save a Doc: `{intent, sufficient, missing[], save_to_doc}` | all | FR1 |
+| Ask a fixed list of clarifying questions when there isn't enough data, instead of calling an agent (§4.5) | T2, T4, T6, T9 | FR2 |
 
 **Plan (Planner)**
 
-| What it must do | Tests | ID |
+| Requirement | Tests | ID |
 |---|---|---|
-| A plan with phases, activities, milestones, deliverables, timeline and key risks; only goals stated in the description | T1, T14 | FR3 |
+| Write a plan with phases, activities, milestones, deliverables, timeline and key risks, using only goals stated in the description | T1, T14 | FR3 |
 
 **Risk (Risk agent)**
 
-| What it must do | Tests | ID |
+| Requirement | Tests | ID |
 |---|---|---|
-| A risk matrix (category, risk, impact, mitigation, live task signals) using only R01–R10 | T3, T13, T15 | FR4 |
-| Top-N risks ranked by the fixed tier rule (§6.4) | T7 | FR5 |
+| Build a risk matrix (category, risk, impact, mitigation, live task signals) from R01–R10 only | T3, T13, T15 | FR4 |
+| Rank the top-N risks by the fixed tier rule (§6.4) | T7 | FR5 |
 
 **Status (Status agent)**
 
-| What it must do | Tests | ID |
+| Requirement | Tests | ID |
 |---|---|---|
-| A weekly sprint report: tasks by status, blockers, overdue items, upcoming milestones, health (RAG) | T5, T10, T16 | FR6 |
-| Blocked and at-risk tasks (overdue, or due within 7 days and not Done) as of the as-of date | T8 | FR7 |
-| Milestones due in the next N weeks, by date only (the timeline has no milestone status) | T11 | FR8 |
+| Write a weekly sprint report: tasks by status, blockers, overdue items, upcoming milestones and health (RAG) | T5, T10, T16 | FR6 |
+| Flag blocked and at-risk tasks (overdue, or due within 7 days and not Done) as of the as-of date | T8 | FR7 |
+| List milestones due in the next N weeks, by date only (the timeline has no milestone status) | T11 | FR8 |
 
 **Stakeholder email (extended)**
 
-| What it must do | Tests | ID |
+| Requirement | Tests | ID |
 |---|---|---|
-| A sprint update for an audience, using only that sprint's tasks | T12, T17 | FR9 |
-| Send only after the PM clicks **Approve** in Slack; on **Decline**, take the PM's feedback and redraft (§6.6) | — | FR10 |
+| Draft a sprint update for an audience, using only that sprint's tasks | T12, T17 | FR9 |
+| Send it only after the PM clicks **Approve** in Slack; on **Decline**, take the PM's feedback and redraft (§6.6) | — | FR10 |
 
 **Delivery**
 
-| What it must do | Tests | ID |
+| Requirement | Tests | ID |
 |---|---|---|
-| Save the plan, risk assessment and weekly report as a Google Doc in `Mira Reports`, with the link in chat; short answers stay in chat | T1, T3, T5 | FR13 |
-| Every Monday at 09:00, create the weekly report for the current sprint, save it as a Doc and post a summary + link to Slack | manual check | FR16 |
+| Save the plan, risk assessment and weekly report as a Google Doc in `Mira Reports`, and show the link in chat; keep short answers in chat | T1, T3, T5 | FR13 |
+| Create the weekly report for the current sprint every Monday at 09:00, save it as a Doc and post a summary + link to Slack | manual check | FR16 |
 
 **All agents and data**
 
-| What it must do | Tests | ID |
+| Requirement | Tests | ID |
 |---|---|---|
-| Every output cites source IDs (T###, R##, phase #) | all | FR11 |
-| Every output follows the format in its prompt ([Appendix](#appendix-system-prompts)) | all | FR12 |
-| Read the original files unchanged; my settings and mitigation links in `mira_config.json` | all | FR14 |
+| Cite source IDs (T###, R##, phase #) in every output | all | FR11 |
+| Follow the format in each agent's prompt ([Appendix](#appendix-system-prompts)) | all | FR12 |
+| Read the original files unchanged, and keep my settings and mitigation links in `mira_config.json` | all | FR14 |
 
 ## 3. Non-functional requirements
 
