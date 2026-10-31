@@ -328,7 +328,7 @@ I chose this over n8n's Text Classifier node followed by a separate sufficiency 
 
 Loading only the needed files would mean fewer downloads and a slightly faster run, but every tool would need its own download steps. Loading everything up front is simpler: there is one set of download steps, and each tool is just a Code node. The files are tiny (about 10 KB in all), so the cost is small. Each agent has 3 tools and usually calls each one once per request, and every call downloads all 5 files: 3 × 5 = 15 Drive downloads per request. That adds an estimated 1–3 s and no extra LLM cost. I made this choice to keep each tool self-contained: Mira Tools gets its own data, so any agent can call it and each tool can be tested on its own. A better design would have Mira main download the 5 files once, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of 15.
 
-At scale this would change for the task board. It would come from a task tool's API (for example Jira, Azure DevOps or Notion), and a real board holds hundreds of tasks. Then the task tools should ask the board for only the tasks they need. The other 4 files stay small and can still load every time.
+At scale, the task board is the one input that changes. A real project keeps its tasks in a task tool such as Jira, Azure DevOps or Notion, and a real board holds hundreds of tasks. The task data would then come from that tool's API, and the task tools should ask the API for only the tasks they need. The other 4 files stay small, so they can still be downloaded whole once per request.
 
 ## 6. Solution design details
 
