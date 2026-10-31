@@ -563,6 +563,7 @@ Next, I would:
 8. **build** a Slack chat app so PMs can ask the assistant from Slack instead of the n8n chat. Optionally, add conversation memory for each Slack thread, so follow-up questions like "and what about Sprint 4?" keep the context.
 9. **add** at least two more stakeholder email tests (e.g. another audience, a sprint with no overdue work) and give the email capability its own metric
 10. **add** graceful error handling: if a tool, Google Drive or Slack call fails, reply with a clear message instead of stopping silently
+11. **download** the project files once per request in Mira main, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of about 15 today, where each of an agent's 3 tool calls downloads all 5 files
 
 ### Evaluation and fine-tuning
 The evaluation set, with human verdicts across 3 final runs, is a labelled dataset. I chose **not** to fine-tune: every failure was fixed faster with a prompt, code or a model change, and 17 examples would overfit. Fine-tuning becomes worthwhile after the pilot. PM-corrected outputs, such as emails declined and redrafted in Slack, could train the Stakeholder agent or the Planner, and the same eval workflow would show whether it helps before release.
