@@ -35,8 +35,8 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 
 | ID | Objective | Measure |
 |---|---|---|
-| BO1 | Cut time to produce a first-draft project plan | 3–4 hrs → ≤ 30 min (incl. PM review) |
-| BO2 | Cut time to produce a weekly status report | 1–2 hrs → ≤ 15 min |
+| BO1 | Cut time to produce a first-draft project plan | 3–4 hrs → ≤ 30 min (incl. PM review) *(measured in pilot)* |
+| BO2 | Cut time to produce a weekly status report | 1–2 hrs → ≤ 15 min *(measured in pilot)* |
 | BO3 | Standardize artifacts across projects | Every output uses the fixed format set in its agent's prompt ([prompts](../final-v1/prompts/), summarized in [PRD §6.5](02_prd.md#65-output-templates-abridged)); checked by hand in the human review, and by the judge where a test's criteria include the format |
 | BO4 | Surface at-risk milestones before they are missed | At-risk items flagged on request, including tasks due within 7 days |
 | BO5 | Trustworthy output | 0 fabricated tasks, risks or milestones in evaluation |
@@ -84,7 +84,7 @@ Nexora's PMs/TPMs spend a large share of their week producing project artifacts 
 | SC3 | Status accuracy (Status) | Average ≥ 0.9; T10 = 1.0 |
 | SC4 | Tests passed — human verdict (PM), with LLM judge scores alongside | **17 / 17 tests** (12 from the brief + T13–T17); judge agreement reported |
 | SC5 | Cost per request (actual cost from OpenAI usage; Langfuse traces show an estimate) | < US$0.01 |
-| SC6 | Pilot PM satisfaction ("would use weekly") | ≥ 4 / 5 |
+| SC6 | Pilot PM satisfaction ("would use weekly") | ≥ 4 / 5 *(measured in pilot)* |
 
 Metric definitions are in [04 Evaluation metrics](04_evaluation_metrics.md).
 

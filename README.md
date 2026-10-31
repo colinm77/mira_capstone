@@ -9,8 +9,8 @@ I built Mira in **n8n** as a **router**. One Orchestrator call decides what kind
 | Agent | Type | What it does |
 |---|---|---|
 | Planner | Core | Project plan: phases, milestones, deliverables and key risks, from the description and timeline |
-| Risk Assessor | Core | Risk matrix and top risks from the register (R01–R10), linked to live task signals (blocked, overdue) |
-| Status Reporter | Core | Weekly status report, task counts, blocked and at-risk tasks, upcoming milestones |
+| Risk agent | Core | Risk matrix and top risks from the register (R01–R10), linked to live task signals (blocked, overdue) |
+| Status agent | Core | Weekly status report, task counts, blocked and at-risk tasks, upcoming milestones |
 | **Stakeholder** | **Extended** | Sprint update email for an audience. **The PM must click Approve in Slack before Gmail sends anything**; Decline → feedback → redraft |
 
 Core plans, risk assessments and status reports are saved as Google Docs. A weekly status report posts to Slack every Monday, and Langfuse traces every request for observability.
@@ -62,9 +62,9 @@ Three use cases where agents save Nexora's PMs/TPMs time. Full detail (inputs, o
 
 | Use case | Pain point | Agent(s) | Success metrics |
 |---|---|---|---|
-| **UC1 Project plan generation** | A first plan takes 3–4 hrs, and every PM uses a different format | Planner | Draft in ≤ 30 min · 0 invented goals or milestones · quality ≥ 4/5 |
-| **UC2 Weekly status and at-risk tracking** | Status takes 1–2 hrs a week; slips are found too late | Status Reporter | Counts 100% correct · 100% of blocked and overdue tasks caught · report in ≤ 15 min |
-| **UC3 Risk assessment and stakeholder comms** | Risk matrices are inconsistent; emails are rewritten for each audience | Risk Assessor + Stakeholder | 100% real risk IDs · 0 out-of-sprint tasks · ≥ 70% of emails approved without edits |
+| **UC1 Project plan generation** | A first plan takes 3–4 hrs, and every PM uses a different format | Planner | 0 invented goals or milestones · plan groundedness ≥ 0.95 *(pilot only: draft in ≤ 30 min)* |
+| **UC2 Weekly status and at-risk tracking** | Status takes 1–2 hrs a week; slips are found too late | Status agent | Counts 100% correct · 100% of blocked and overdue tasks caught *(pilot only: report in ≤ 15 min)* |
+| **UC3 Risk assessment and stakeholder comms** | Risk matrices are inconsistent; emails are rewritten for each audience | Risk agent + Stakeholder | 100% real risk IDs · 0 out-of-sprint tasks *(pilot only: ≥ 70% of emails approved without edits)* |
 
 ---
 
@@ -81,8 +81,8 @@ flowchart TD
     G -- no --> C[Clarify<br/>fixed questions per request type]
     G -- yes --> W{Which agent?}
     W --> P[Planner]
-    W --> R[Risk Assessor]
-    W --> S[Status Reporter]
+    W --> R[Risk agent]
+    W --> S[Status agent]
     W --> K[Stakeholder]
     P & R & S & K --> T[Mira Tools<br/>Drive files → parse CSV fields → Code nodes → JSON to agent<br/>tasks · overdue/blocked · milestones · risks · description · timeline]
     F[(Project files from the brief<br/>description · timeline · risks · task board)] --> T
@@ -522,7 +522,7 @@ Full charter: [docs/01_project_charter_brd.md](docs/01_project_charter_brd.md).
 
 - **Vision:** I will build an AI Project Assistant in n8n that helps Nexora's PMs and TPMs turn raw project data into standardized plans, risk assessments and status reports in minutes. PMs ask for them in the n8n chat, and the assistant saves each one as a Google Doc. Every Monday it posts the weekly status report to Slack automatically. It drafts stakeholder emails that the PM approves in Slack before they are sent. Every statement traces back to the source data, and it flags overdue and blocked work.
 - **Scope (v1):** one active project; plan, risk and status (core); stakeholder updates with Slack approval (extended); tracing and evaluation. Out of scope: live Jira/Trello sync, portfolio views, fine-tuning.
-- **Success criteria:** SC1–SC3 (the 3 metrics), SC4 (17/17 tests, human verdict), SC5 (cost per request < $0.01), SC6 (pilot satisfaction ≥ 4/5).
+- **Success criteria:** SC1–SC3 (the 3 metrics), SC4 (17/17 tests, human verdict), SC5 (cost per request < $0.01), SC6 (pilot satisfaction ≥ 4/5, *measured in pilot*).
 - **Stakeholders:** CTO (sponsor), 10 PMs/TPMs (users), engineering leads, ABCDE Ltd stakeholders, security/legal.
 - **Decision-making:** the AI TPM decides scope and design; cost or vendor changes need CTO approval; the CTO makes the go/no-go call on evaluation results and legal sign-off.
 - **Rollout:** build and test → 2-PM pilot → 10 PMs/TPMs → operate (see §4).
@@ -562,6 +562,7 @@ Next, I would:
 7. **bring** Risk and Status back under $0.01 per request, e.g. by trimming tool output
 8. **build** a Slack chat app so PMs can ask the assistant from Slack instead of the n8n chat. Optionally, add conversation memory for each Slack thread, so follow-up questions like "and what about Sprint 4?" keep the context.
 9. **add** at least two more stakeholder email tests (e.g. another audience, a sprint with no overdue work) and give the email capability its own metric
+10. **add** graceful error handling: if a tool, Google Drive or Slack call fails, reply with a clear message instead of stopping silently
 
 ### Evaluation and fine-tuning
 The evaluation set, with human verdicts across 3 final runs, is a labelled dataset. I chose **not** to fine-tune: every failure was fixed faster with a prompt, code or a model change, and 17 examples would overfit. Fine-tuning becomes worthwhile after the pilot. PM-corrected outputs, such as emails declined and redrafted in Slack, could train the Stakeholder agent or the Planner, and the same eval workflow would show whether it helps before release.
