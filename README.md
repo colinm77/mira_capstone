@@ -32,8 +32,8 @@ I evaluated Mira in n8n. An evaluation workflow runs each test through Mira, sco
 | Plan groundedness | 1.00 | **1.00** | ≥ 0.95 |
 | Risk relevance | 0.60 | **0.93** | ≥ 0.9 |
 | Status accuracy | 0.67 | **1.00** (T10 = 1.0) | ≥ 0.9, T10 = 1.0 |
-| Cost per request (using Mira) | — | **≈ $0.001** (plan, email) · **≈ $0.011** (risk, status) | < $0.01 |
-| Cost per evaluation run (17 tests) | — | **≈ $0.21**: gpt-4.1 judges ≈ $0.10 + Mira ≈ $0.11 | — |
+| Cost per request (using Mira) | not measured | **≈ $0.001** (plan, email) · **≈ $0.011** (risk, status) | < $0.01 |
+| Cost per evaluation run (17 tests) | not measured | **≈ $0.21**: gpt-4.1 judges ≈ $0.10 + Mira ≈ $0.11 | — |
 
 *Plan groundedness covers the plan tests (T1, T2, T9, T14). The Groundedness judge also scores the other tests. There a few score just under 1.0 (0.80–0.95, still a pass): T5 and T8 for the health rating and suggested actions they are asked to give, and T11 for answering "Owner: UNKNOWN" when the data has no owner. These are requested judgements or honest gaps, not invented facts.*
 

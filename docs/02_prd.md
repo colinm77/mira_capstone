@@ -21,7 +21,7 @@
 ### UC2 — Weekly status report and at-risk tracking
 - **Pain point:** status takes 1–2 hrs/week; slips are found in retros.
 - **Agentic solution:** the Status agent queries the task board and timeline through deterministic tools (counts, overdue, upcoming). It writes the report and, when asked, flags blocked or at-risk tasks and upcoming milestones with suggested actions.
-- **Inputs:** `sample_task_board`, `project_timeline`, `AS_OF_DATE`.
+- **Inputs:** `sample_task_board`, `project_timeline`, the as-of date.
 - **Output:** a weekly status report (done / in progress / blocked / upcoming / health), shown in the n8n chat and saved as a Google Doc. Every Monday the report is also created automatically and posted to Slack #mira-reports. Short answers (task counts, the at-risk list, upcoming milestones) stay in chat.
 - **Success metrics:** counts 100% correct (T10); blocked/overdue recall 100% (e.g. T024, T006). *(Pilot only: report time ≤ 15 min.)*
 - **Knowledge base:** task board, timeline; status format and health rules (§6.5).
@@ -71,7 +71,7 @@ What the assistant must do, grouped by agent or job. Tests lists the tests that 
 | Requirement | Tests | ID |
 |---|---|---|
 | Draft a sprint update for an audience, using only that sprint's tasks | T12, T17 | FR9 |
-| Send it only after the PM clicks **Approve** in Slack; on **Decline**, take the PM's feedback and redraft (§6.6) | — | FR10 |
+| Send it only after the PM clicks Approve in Slack; on Decline, take the PM's feedback and redraft (§6.6) | manual check *(screenshots in README §2.3)* | FR10 |
 
 **Delivery**
 
@@ -149,13 +149,13 @@ flowchart TD
 
 This section lists the assistant's agents: the model each one runs on, the data tools it can call, and the output it produces. Each agent is connected only to the tools its job needs (in security terms, *least privilege*). For example, the Planner can't see the task board, and the Stakeholder agent can't see the risk register. This keeps the data each agent sees to a minimum (NFR5), stops an agent from pulling in data outside its job, and makes its tool calls predictable in the traces.
 
-**Core vs extended.** The brief requires plan, risk and status (core) and at least one extended capability. The assistant includes **one** extended capability: the **Stakeholder** agent (the brief's "Stakeholder Update Generator").
+**Core vs extended.** The brief requires plan, risk and status (core) and at least one extended capability. The assistant includes one extended capability: the Stakeholder agent (the brief's "Stakeholder Update Generator").
 
 Questions about blocked tasks and upcoming milestones (T8, T11) are handled by the Status agent, which already has the needed tools. I chose one extension to keep the number of agents to build and evaluate small. Scheduled milestone alerts are a phase 2 idea.
 
 | Agent | Model | Tools it can call | Output template |
 |---|---|---|---|
-| Orchestrator | gpt-4o-mini, Basic LLM Chain + Structured Output Parser (single call, no tools) | — | `{intent, sufficient, missing[], save_to_doc}` |
+| Orchestrator | gpt-4o-mini, Basic LLM Chain + Structured Output Parser (single call, no tools) | none | `{intent, sufficient, missing[], save_to_doc}` |
 | Planner | gpt-4o-mini, AI Agent | `get_description`, `get_timeline`, `get_risks` | Plan template (incl. short "Key risks" section) |
 | Risk agent | gpt-4o (`gpt-4o-2024-11-20`), AI Agent — upgraded from gpt-4o-mini in CHG-14 | `get_description`, `get_risks`, `get_overdue_or_blocked` | Risk matrix template |
 | Status agent | gpt-4o (`gpt-4o-2024-11-20`), AI Agent — upgraded from gpt-4o-mini in CHG-16 | `get_tasks`, `get_overdue_or_blocked`, `get_upcoming_milestones` | Status template; at-risk / milestone list |
@@ -169,13 +169,13 @@ Questions about blocked tasks and upcoming milestones (T8, T11) are handled by t
 
 This is what keeps the assistant grounded: numbers and dates come from code, words come from the LLM.
 
-All six tools live in **one n8n workflow, "Mira Tools"**. Each agent attaches one **Call n8n Workflow Tool** node per tool, all pointing at Mira Tools with a different tool name. Inside, a **Switch** sends the request to that tool's branch, which computes in a Code node and returns JSON. Before the Switch, one **load-data block** downloads all 5 files from Google Drive and parses them with the **Extract from File** node (CSV → rows, TXT → text, JSON → object), on every call (see §5.2 "File loading").
+All six tools live in one n8n workflow, "Mira Tools". Each agent attaches one Call n8n Workflow Tool node per tool, all pointing at Mira Tools with a different tool name. Inside, a Switch sends the request to that tool's branch, which computes in a Code node and returns JSON. Before the Switch, one load-data block downloads all 5 files from Google Drive and parses them with the Extract from File node (each CSV into rows, the text file into text, the config into an object), on every call (see §5.2 "File loading").
 
 | Tool | Parameters | Returns |
 |---|---|---|
 | `get_description` | none | project description text |
 | `get_timeline` | none | 8 phases with weeks converted to dates |
-| `get_tasks` | `sprint` and `status`, both optional (the agent fills them in) | matching task rows **plus exact counts by status** (Done, In Progress, Blocked, To Do, total) |
+| `get_tasks` | `sprint` and `status`, both optional (the agent fills them in) | matching task rows plus exact counts by status (Done, In Progress, Blocked, To Do, total) |
 | `get_overdue_or_blocked` | none (uses the as-of date 2026-04-28 and the 7-day window from `mira_config.json`) | blocked, overdue and due-soon tasks, each with a reason |
 | `get_upcoming_milestones` | none (uses `milestone_window_days` from `mira_config.json`) | milestones due in the next `milestone_window_days` |
 | `get_risks` | none | risks R01–R10 with mitigation tasks, link strength, coverage status, tier and rank (§6.4) |
@@ -184,28 +184,28 @@ All six tools live in **one n8n workflow, "Mira Tools"**. Each agent attaches on
 - **Settings:** `as_of_date`, `project_start`, `current_sprint`, `due_soon_days`, `milestone_window_days`
 - **Mitigation links:** `risk_mitigation` (tasks + link strength per risk, §6.4)
 
-The **Load settings** Code node passes the config to every tool. For a new project, swap the data files and the config; the code doesn't change. Two places still name the project and would need editing: the Orchestrator prompt (the active project) and the active-project guard, which checks for "abcde" in an If node (§4.5). See also §5.2, "Project facts".
+The Load settings Code node passes the config to every tool. For a new project, swap the data files and the config; the code doesn't change. Two places still name the project and would need editing: the Orchestrator prompt (the active project) and the active-project guard, which checks for "abcde" in an If node (§4.5). See also §5.2, "Project facts".
 
 **How a tool call reads the data (no LLM in the path):**
 1. **Call.** The agent calls a tool (e.g. `get_tasks` with `sprint = "Sprint 3"`) through its Call n8n Workflow Tool node. That runs Mira Tools with the tool name and inputs.
-2. **Download.** Google Drive nodes download fixed files by **file ID**, set in the node, not searched for: `project_description.txt`, `project_timeline_mira.csv`, `project_risks_mira.csv`, `sample_task_board_mira.csv` and `mira_config.json`. The `_mira` suffix only tells these copies apart from other copies in the same Drive. The contents are the brief's originals, unchanged.
-3. **Parse.** **Extract from File** turns each CSV into rows with fields named by its header (`task_id`, `status`, `sprint`, `due_date` …), the description into text and the config into an object. This runs on every call, with nothing cached.
-4. **Calculate.** **Load settings** adds the config. The **Switch** picks the tool's Code node, which filters on exact field values and calculates (counts, overdue against `as_of_date`, tiers …).
+2. **Download.** Google Drive nodes download fixed files by file ID, set in the node, not searched for: `project_description.txt`, `project_timeline_mira.csv`, `project_risks_mira.csv`, `sample_task_board_mira.csv` and `mira_config.json`. The `_mira` suffix only tells these copies apart from other copies in the same Drive. The contents are the brief's originals, unchanged.
+3. **Parse.** Extract from File turns each CSV into rows with fields named by its header (`task_id`, `status`, `sprint`, `due_date` …), the description into text and the config into an object. This runs on every call, with nothing cached.
+4. **Calculate.** Load settings adds the config. The Switch picks the tool's Code node, which filters on exact field values and calculates (counts, overdue against `as_of_date`, tiers …).
 5. **Return.** The Code node returns a small JSON result. If nothing matches (e.g. Sprint 42), it returns an empty list and says so.
 
-**Trade-off: fixed file format.** The code relies on the CSV column names and the date format. A renamed column (e.g. `status` → `state`) or a new date format would make the tools silently match nothing. There is no schema check yet. A future fix is to validate the headers on load and fail loudly.
+**Trade-off: fixed file format.** The code relies on the CSV column names and the date format. A renamed column (e.g. `status` renamed to `state`) or a new date format would make the tools silently match nothing. There is no schema check yet. A future fix is to validate the headers on load and fail loudly.
 
 ### 4.4 n8n workflows
 
-The assistant is built as **five n8n workflows**:
+The assistant is built as five n8n workflows:
 
 | Workflow | Contains |
 |---|---|
-| **Mira main** | n8n Chat trigger + Monday 09:00 Schedule trigger + eval trigger (When Executed by Another Workflow) → Normalize request, Orchestrator, Switches, Clarify, the 4 agents, Langfuse trace send; calls Mira Save Doc, posts the Monday summary to Slack, and calls Mira Stakeholder Approval (no wait) |
-| **Mira Tools** | Load-data block + the 6 data tools behind one Switch (§4.3) |
-| **Mira Save Doc** | Saves a report as a formatted Google Doc: Markdown → HTML → Drive upload with conversion to Google Doc, into `Mira Reports`. In: title, markdown. Out: doc_id, doc_url. Called by Mira main (chat and scheduled report) |
-| **Mira Stakeholder Approval** | Slack Approve / Decline for stakeholder email drafts; on Decline asks for feedback and redrafts (one LLM step that edits the draft, no tools); on Approve sends via Gmail. Called by Mira main **without waiting**, so the chat replies right away |
-| **Mira – Evaluation** | Evaluation Trigger, runs Mira main for each of the 17 tests (12 brief + 5 extra), 2 judges, Set Metrics (see doc 05) |
+| Mira main | n8n Chat trigger + Monday 09:00 Schedule trigger + eval trigger (When Executed by Another Workflow), then Normalize request, Orchestrator, Switches, Clarify, the 4 agents, Langfuse trace send; calls Mira Save Doc, posts the Monday summary to Slack, and calls Mira Stakeholder Approval (no wait) |
+| Mira Tools | Load-data block + the 6 data tools behind one Switch (§4.3) |
+| Mira Save Doc | Saves a report as a formatted Google Doc in `Mira Reports`: converts the Markdown to HTML, then uploads it to Drive, which converts it to a Google Doc. In: title, markdown. Out: doc_id, doc_url. Called by Mira main (chat and scheduled report) |
+| Mira Stakeholder Approval | Slack Approve / Decline for stakeholder email drafts; on Decline asks for feedback and redrafts (one LLM step that edits the draft, no tools); on Approve sends via Gmail. Called by Mira main without waiting, so the chat replies right away |
+| Mira – Evaluation | Evaluation Trigger, runs Mira main for each of the 17 tests (12 brief + 5 extra), 2 judges, Set Metrics (see doc 05) |
 
 ### 4.5 Orchestration pattern and rationale
 
@@ -214,7 +214,7 @@ The assistant is built as **five n8n workflows**:
 | Option | Fit | Decision |
 |---|---|---|
 | Sequential pipeline | Every request would run all agents, which is wasteful. A "top 3 risks" question doesn't need a plan. | Rejected |
-| **Router / dispatcher** | Requests are naturally one type (plan, risk, status…), as the 17 tests show | **Selected (primary)** |
+| Router / dispatcher | Requests are naturally one type (plan, risk, status…), as the 17 tests show | Selected (primary) |
 | Hierarchical | An orchestrator agent splits work across several agents. Not needed: each request needs one agent. The plan's risk section is covered by the Planner's `get_risks` tool | Rejected |
 
 Why this pattern:
@@ -229,11 +229,16 @@ Why this pattern:
 { "intent": "plan", "sufficient": false, "missing": ["scope", "timeline", "team size"], "save_to_doc": false }
 ```
 
-Two nodes then act on it:
-1. **"Enough data?" (If node):** if `sufficient = false` (or `intent = unclear`) → Clarify reply. **Active-project guard (CHG-15):** a request that names the active project ("ABCDE") always goes through, even if the Orchestrator said `sufficient = false`, because the assistant already has that project's data. Code overrules the LLM only for this known fact; the intent still comes from the Orchestrator. *Trade-off:* the name "abcde" is written into the If node. For another project it should come from `mira_config.json`.
-2. **"Which Agent?" (Switch):** → the agent for `intent`.
+Two nodes then act on the decision:
+1. *Enough data?* (If node). If the Orchestrator finds too little data, or can't tell what's being asked, the request goes to Clarify. One exception, the active-project guard (CHG-15): a request that names the active project ("ABCDE") always goes through, because the assistant already has that project's data. Code overrules the LLM here, but only for this one known fact; the intent still comes from the Orchestrator. The trade-off: the name "abcde" is written into the If node. For another project it should come from `mira_config.json`.
+2. *Which Agent?* (Switch). It sends the request to the agent for its intent.
 
-**Clarify (Code node, CHG-12)** builds the reply from a **fixed list per intent**, not from the LLM's `missing[]`: plan → scope, goals, timeline, deliverables, team size · risk → domain, scope, goals, timeline, team/technology · status → task data. "Timeline" is left out if the request already gives a duration (week / month / day). The LLM's own list changed from run to run; changing the Orchestrator prompt to fix that broke routing for other tests three times (CHG-08 … CHG-11), so the list moved into code.
+Clarify (Code node, CHG-12) builds its reply from a fixed list of questions per intent, not from the Orchestrator's own list:
+- plan: scope, goals, timeline, deliverables, team size
+- risk: domain, scope, goals, timeline, team/technology
+- status: task data
+
+It leaves out "timeline" if the request already gives a duration (a week, a month, a day). The Orchestrator's list changed from run to run, and three attempts to fix that in its prompt broke routing for other tests (CHG-08 to CHG-11). So the list moved into code.
 
 I chose this over n8n's Text Classifier node followed by a separate sufficiency gate:
 - **One LLM call instead of two:** cheaper and faster.
@@ -244,17 +249,17 @@ I chose this over n8n's Text Classifier node followed by a separate sufficiency 
 
 | Category | Choice | Why |
 |---|---|---|
-| Workflow platform | **n8n (Cloud)** | Recommended in the course and used in earlier assignments. It has built-in Google Drive, Docs, Slack and Gmail nodes, a Slack approval step and built-in evaluations (see §5.1) |
-| LLM (agents) | **gpt-4o-mini** for Orchestrator, Planner, Stakeholder; **gpt-4o** (`gpt-4o-2024-11-20`) for Risk and Status | gpt-4o-mini is cheap and fast enough for routing, plans and emails (≈ $0.001 per plan); accuracy comes from the data tools. Risk and Status were upgraded during evaluation because gpt-4o-mini was unreliable at date reasoning ("due today" vs "due soon"), at summarising long tables, and at keeping Blocked tasks from other sprints (CHG-14, CHG-16). The extra cost (about 15–17× per token for those two agents) was judged worth the better reasoning |
-| LLM (judges) | **gpt-4.1** | A larger, more capable model grades more reliably than the small model it checks, and using a different model avoids self-grading bias. It only runs during evaluation, so cost stays low (about $0.10 per 17-test run, actual). *Later finding: gpt-4.1 is not a reasoning model, so it isn't clearly stronger than gpt-4o. A side test with a reasoning judge is in [README §4](../README.md#what-i-learned-from-the-traces).* |
-| Project data | **Original resource files in a Google Drive folder** (`project_description.txt`, `project_timeline_mira.csv`, `project_risks_mira.csv`, `sample_task_board_mira.csv`) + my `mira_config.json` | The instructor requires parsing the original files, not a combined spreadsheet. Drive works on n8n Cloud; the Extract from File node parses CSV and text with no code |
-| APIs / integrations | **Google Drive, Google Docs, Gmail (OAuth2); Slack (OAuth2)** | Drive holds the source files, Docs stores the saved reports, Slack carries the Monday report and email approvals, Gmail sends approved stakeholder emails |
-| Deterministic logic | **n8n Code nodes (JavaScript)** in one "Mira Tools" workflow | Counting, filtering and date math done in code, not by the LLM, so numbers like task counts and overdue dates are always exact |
-| Human-in-the-loop | **Slack "Send and Wait for Response"** | Built into n8n: the PM clicks Approve or Decline before any stakeholder email is sent |
-| Observability | **Langfuse** (OpenTelemetry endpoint, via HTTP Request node) | Used in class. Shows each step of a run and estimates cost per run (actual cost from OpenAI usage). Tested and working on n8n Cloud |
-| Evaluation | **n8n Evaluations** (Evaluation Trigger + Set Metrics) | Runs all 17 tests in one go and writes scores to the results Google Sheet |
-| Authentication | **OAuth2** (Google, Slack), **API key** (OpenAI), **Basic Auth** (Langfuse public/secret key) | Standard n8n credentials; keys are stored in n8n, never in workflows or prompts |
-| Output | **Markdown** in the n8n chat, and a short summary + Doc link in Slack on Mondays; **Google Doc** for plans, risk assessments and weekly status reports; email via Gmail for stakeholder updates | The instructor expects reports written to a file. Docs are easy to share and edit |
+| Workflow platform | n8n (Cloud) | Recommended in the course and used in earlier assignments. It has built-in Google Drive, Docs, Slack and Gmail nodes, a Slack approval step and built-in evaluations (see §5.1) |
+| LLM (agents) | gpt-4o-mini for Orchestrator, Planner, Stakeholder; gpt-4o (`gpt-4o-2024-11-20`) for Risk and Status | gpt-4o-mini is cheap and fast enough for routing, plans and emails (≈ $0.001 per plan); accuracy comes from the data tools. Risk and Status were upgraded during evaluation because gpt-4o-mini was unreliable at date reasoning ("due today" vs "due soon"), at summarising long tables, and at keeping Blocked tasks from other sprints (CHG-14, CHG-16). The extra cost (about 15–17× per token for those two agents) was judged worth the better reasoning |
+| LLM (judges) | gpt-4.1 | A larger, more capable model grades more reliably than the small model it checks, and using a different model avoids self-grading bias. It only runs during evaluation, so cost stays low (about $0.10 per 17-test run, actual). *Later finding: gpt-4.1 is not a reasoning model, so it isn't clearly stronger than gpt-4o. A side test with a reasoning judge is in [README §4](../README.md#what-i-learned-from-the-traces).* |
+| Project data | Original resource files in a Google Drive folder (`project_description.txt`, `project_timeline_mira.csv`, `project_risks_mira.csv`, `sample_task_board_mira.csv`) + my `mira_config.json` | The instructor requires parsing the original files, not a combined spreadsheet. Drive works on n8n Cloud; the Extract from File node parses CSV and text with no code |
+| APIs / integrations | Google Drive, Google Docs, Gmail (OAuth2); Slack (OAuth2) | Drive holds the source files, Docs stores the saved reports, Slack carries the Monday report and email approvals, Gmail sends approved stakeholder emails |
+| Deterministic logic | n8n Code nodes (JavaScript) in one "Mira Tools" workflow | Counting, filtering and date math done in code, not by the LLM, so numbers like task counts and overdue dates are always exact |
+| Human-in-the-loop | Slack "Send and Wait for Response" | Built into n8n: the PM clicks Approve or Decline before any stakeholder email is sent |
+| Observability | Langfuse (OpenTelemetry endpoint, via HTTP Request node) | Used in class. Shows each step of a run and estimates cost per run (actual cost from OpenAI usage). Tested and working on n8n Cloud |
+| Evaluation | n8n Evaluations (Evaluation Trigger + Set Metrics) | Runs all 17 tests in one go and writes scores to the results Google Sheet |
+| Authentication | OAuth2 (Google, Slack), API key (OpenAI), Basic Auth (Langfuse public/secret key) | Standard n8n credentials; keys are stored in n8n, never in workflows or prompts |
+| Output | Markdown in the n8n chat, and a short summary + Doc link in Slack on Mondays; Google Doc for plans, risk assessments and weekly status reports; email via Gmail for stakeholder updates | The instructor expects reports written to a file. Docs are easy to share and edit |
 
 ## 5. Trade-offs
 
@@ -275,67 +280,67 @@ I chose this over n8n's Text Classifier node followed by a separate sufficiency 
 
 | Decision | Options | Chosen | Why |
 |---|---|---|---|
-| Data access | (a) paste all files into the prompt (b) agents call data tools (c) RAG/vector store | **(b) tools** | Agentic, least-privilege, traceable tool calls. (a) is simpler but every agent sees everything. (c) is overkill for ~10 KB of structured data |
-| Counting and dates | LLM computes vs Code node computes | **Code node** | LLMs miscount; T8, T10, T11 require exact answers |
-| Risk ranking | LLM ranks risks vs code applies a fixed tier rule | **Code (`get_risks`)** | The risk file has no severity scores. A fixed rule gives the same, explainable order every time (§6.4) |
-| Risk–task links | No links vs mitigation tasks with link strength in the risk register | **Mitigation tasks + strength** | Matches real risk registers; answers the leadership question "which risks have mitigation and which don't?" (T13); only strong links raise a tier |
-| Milestone check | Judge milestone completion via phase-to-task links vs list milestones by date only | **By date only** | The timeline has no milestone status, and a phase-to-task table would be a workaround to maintain. Overdue *tasks* already cover the same problem (e.g. T006). T11 only asks for upcoming milestones |
-| Project facts | Hard-code dates and links in Code nodes vs store them in data | **Separate config file `mira_config.json`** (settings + mitigation links) | Code stays generic; the original files stay untouched; my assumptions are clearly separate from the source data |
+| Data access | (a) paste all files into the prompt (b) agents call data tools (c) RAG/vector store | (b) tools | Agentic, least-privilege, traceable tool calls. (a) is simpler but every agent sees everything. (c) is overkill for ~10 KB of structured data |
+| Counting and dates | LLM computes vs Code node computes | Code node | LLMs miscount; T8, T10, T11 require exact answers |
+| Risk ranking | LLM ranks risks vs code applies a fixed tier rule | Code (`get_risks`) | The risk file has no severity scores. A fixed rule gives the same, explainable order every time (§6.4) |
+| Risk–task links | No links vs mitigation tasks with link strength in the risk register | Mitigation tasks + strength | Matches real risk registers; answers the leadership question "which risks have mitigation and which don't?" (T13); only strong links raise a tier |
+| Milestone check | Judge milestone completion via phase-to-task links vs list milestones by date only | By date only | The timeline has no milestone status, and a phase-to-task table would be a workaround to maintain. Overdue *tasks* already cover the same problem (e.g. T006). T11 only asks for upcoming milestones |
+| Project facts | Hard-code dates and links in Code nodes vs store them in data | Separate config file `mira_config.json` (settings + mitigation links) | Code stays generic; the original files stay untouched; my assumptions are clearly separate from the source data |
 
 **Agents and routing**
 
 | Decision | Options | Chosen | Why |
 |---|---|---|---|
-| Agent granularity | Merge Plan+Risk, or keep separate | **Separate** | Focused prompts, clean traces, standalone risk route for T3/T7 |
-| Planner's risk section | Call the Risk agent as a sub-agent vs give the Planner the `get_risks` tool | **`get_risks` tool** | Simpler: no separate Risk workflow, no agent-calling-agent, one fewer LLM call. Downside: risk wording in the plan may differ slightly from the Risk agent's output |
-| Vague-input handling | Rely on agent prompts vs check in the Orchestrator | **Check in the Orchestrator** | One consistent, testable decision point for T2/T4/T6/T9; stops wasted agent calls |
-| Follow-up questions | Conversation memory (the assistant remembers the chat) vs ask the user to resend the full request | **Resend the full request (v1)** | Deterministic, no extra cost, no new failure modes; Clarify and the vague-rule replies tell the user exactly what to resend. Memory is a next step, together with a Slack chat app (README §4) |
+| Agent granularity | Merge Plan+Risk, or keep separate | Separate | Focused prompts, clean traces, standalone risk route for T3/T7 |
+| Planner's risk section | Call the Risk agent as a sub-agent vs give the Planner the `get_risks` tool | `get_risks` tool | Simpler: no separate Risk workflow, no agent-calling-agent, one fewer LLM call. Downside: risk wording in the plan may differ slightly from the Risk agent's output |
+| Vague-input handling | Rely on agent prompts vs check in the Orchestrator | Check in the Orchestrator | One consistent, testable decision point for T2/T4/T6/T9; stops wasted agent calls |
+| Follow-up questions | Conversation memory (the assistant remembers the chat) vs ask the user to resend the full request | Resend the full request (v1) | Deterministic, no extra cost, no new failure modes; Clarify and the vague-rule replies tell the user exactly what to resend. Memory is a next step, together with a Slack chat app (README §4) |
 
 **Outputs and delivery**
 
 | Decision | Options | Chosen | Why |
 |---|---|---|---|
-| Saving reports | Chat only vs also write to a file | **Also save to a Google Doc** (plan, risk assessment, weekly status report) | Instructor expectation. The Orchestrator sets `save_to_doc`; saving is skipped in eval mode so test runs don't create Docs |
-| Weekly report delivery | On request only vs also scheduled | **Also scheduled** (Monday 09:00 → Google Doc + Slack post) | "Weekly" should arrive every week without anyone asking; reuses the same flow, so no new agent or test |
-| Delivery routing | A chain of IF nodes (Save to doc? → Needs approval? → From schedule?) vs one "Decide delivery" Code node + a "Delivery" Switch | **One decision + 3 lanes: doc, chat_only, schedule** | Each run follows one straight lane; the rule is readable in one place; easier to explain and screenshot. Stakeholder approval is not a lane: it is one node ("Send for approval") on the Stakeholder path, right after the agent |
+| Saving reports | Chat only vs also write to a file | Also save to a Google Doc (plan, risk assessment, weekly status report) | Instructor expectation. The Orchestrator sets `save_to_doc`; saving is skipped in eval mode so test runs don't create Docs |
+| Weekly report delivery | On request only vs also scheduled | Also scheduled (every Monday 09:00: Google Doc + Slack post) | "Weekly" should arrive every week without anyone asking; reuses the same flow, so no new agent or test |
+| Delivery routing | A chain of IF nodes (Save to doc? Needs approval? From schedule?) vs one "Decide delivery" Code node + a "Delivery" Switch | One decision + 3 lanes: doc, chat_only, schedule | Each run follows one straight lane; the rule is readable in one place; easier to explain and screenshot. Stakeholder approval is not a lane: it is one node ("Send for approval") on the Stakeholder path, right after the agent |
 
 **Human approval**
 
 | Decision | Options | Chosen | Why |
 |---|---|---|---|
-| Stakeholder approval location | Inside Mira main vs a separate workflow called without waiting | **Separate workflow** | Slack approval pauses until someone clicks (could be hours); inside Mira main the chat would hang. Separate workflow lets the chat reply immediately |
-| Approval channel | Slack vs Gmail vs n8n Form | **Slack** | Already set up (#mira-reports bot) and where PMs work; also used for the Monday report |
+| Stakeholder approval location | Inside Mira main vs a separate workflow called without waiting | Separate workflow | Slack approval pauses until someone clicks (could be hours); inside Mira main the chat would hang. Separate workflow lets the chat reply immediately |
+| Approval channel | Slack vs Gmail vs n8n Form | Slack | Already set up (#mira-reports bot) and where PMs work; also used for the Monday report |
 
 **Models and cost**
 
 | Decision | Options | Chosen | Why |
 |---|---|---|---|
-| Model | gpt-4o-mini vs larger model | **gpt-4o-mini for all agents** at first; **Risk and Status moved to gpt-4o** after evaluation (CHG-14, CHG-16) | Cheapest capable model; grounding comes from tools, not model size. Evaluation showed two agents needed better reasoning; quick tests in the editor chat confirmed gpt-4o fixed their failing tests before the change was made |
-| Judge model | Same as the agents vs a larger, more capable model | **gpt-4.1** | A larger, more capable model grades more reliably than the small model it is checking (gpt-4o-mini), and using a different model avoids self-grading bias. Judges run only during evaluation, so the higher price has little cost impact. *Later finding: gpt-4.1 is not a reasoning model, so it isn't clearly stronger than gpt-4o. A side test with a reasoning judge is in [README §4](../README.md#what-i-learned-from-the-traces).* |
-| Token counts for cost | Exact counts from the n8n API after each run vs estimate in the trace Code node (characters ÷ 4) | **Estimate in the trace Code node** | A Code node cannot read the chat model's token counts during the run. The estimate is simple and needs no extra workflow or API key. Calibrated against n8n's own count on T1: 3,108 estimated vs 3,098 (0.3% off). At ~$0.001 per plan the difference is negligible |
+| Model | gpt-4o-mini vs larger model | gpt-4o-mini for all agents at first; Risk and Status moved to gpt-4o after evaluation (CHG-14, CHG-16) | Cheapest capable model; grounding comes from tools, not model size. Evaluation showed two agents needed better reasoning; quick tests in the editor chat confirmed gpt-4o fixed their failing tests before the change was made |
+| Judge model | Same as the agents vs a larger, more capable model | gpt-4.1 | A larger, more capable model grades more reliably than the small model it is checking (gpt-4o-mini), and using a different model avoids self-grading bias. Judges run only during evaluation, so the higher price has little cost impact. *Later finding: gpt-4.1 is not a reasoning model, so it isn't clearly stronger than gpt-4o. A side test with a reasoning judge is in [README §4](../README.md#what-i-learned-from-the-traces).* |
+| Token counts for cost | Exact counts from the n8n API after each run vs estimate in the trace Code node (characters ÷ 4) | Estimate in the trace Code node | A Code node cannot read the chat model's token counts during the run. The estimate is simple and needs no extra workflow or API key. Calibrated against n8n's own count on T1: 3,108 estimated vs 3,098 (0.3% off). At ~$0.001 per plan the difference is negligible |
 
 **Tools and data loading**
 
 | Decision | Options | Chosen | Why |
 |---|---|---|---|
-| File loading | Each tool downloads only its own files vs one load-data block downloads all 5 files on every tool call | **Load all files on every call** | Simpler: one chain at the start of Mira Tools, every tool is just a Code node. Files are tiny (~10 KB). Cost: about 15 Drive downloads per request (3 tool calls × 5 files), likely 1–3 s extra latency, no extra LLM cost. Revisit if Langfuse shows latency is a problem |
+| File loading | Each tool downloads only its own files vs one load-data block downloads all 5 files on every tool call | Load all files on every call | Simpler: one chain at the start of Mira Tools, every tool is just a Code node. Files are tiny (~10 KB). Cost: about 15 Drive downloads per request (3 tool calls × 5 files), likely 1–3 s extra latency, no extra LLM cost. Revisit if Langfuse shows latency is a problem |
 
 ## 6. Solution design details
 
 ### 6.1 Intents (Orchestrator)
 
 The Orchestrator sorts every request into one of five intents, and each intent goes to one agent:
-- **plan** → Planner (a project plan, phases or schedule)
-- **risk** → Risk agent (risks, top risks, mitigations, mitigation coverage)
-- **status** → Status agent (status reports, task counts, blocked or overdue tasks, upcoming milestones)
-- **stakeholder** → Stakeholder agent (an email or update for an audience)
-- **unclear** → Clarify asks what the user wants
+- **plan:** Planner (a project plan, phases or schedule)
+- **risk:** Risk agent (risks, top risks, mitigations, mitigation coverage)
+- **status:** Status agent (status reports, task counts, blocked or overdue tasks, upcoming milestones)
+- **stakeholder:** Stakeholder agent (an email or update for an audience)
+- **unclear:** Clarify asks what the user wants
 
 The exact wording is in the Orchestrator prompt ([Appendix](#appendix-system-prompts)). The tests for each agent are shown in the §4.1 diagram.
 
 ### 6.2 Sufficiency rules (part of the Orchestrator prompt)
 
-The assistant works on one active project (ABCDE Ltd), named once in the Orchestrator prompt. A request has **enough information** if it refers to that project or its data (e.g. "ABCDE", "the task board", "Sprint 3"), or if it describes a new project in enough detail to answer. If not, the assistant doesn't guess: Clarify asks for a fixed list of details for that request type (§4.5). The exact rules are in the Orchestrator prompt ([Appendix](#appendix-system-prompts)).
+The assistant works on one active project (ABCDE Ltd), named once in the Orchestrator prompt. A request has enough information if it refers to that project or its data (e.g. "ABCDE", "the task board", "Sprint 3"), or if it describes a new project in enough detail to answer. If not, the assistant doesn't guess: Clarify asks for a fixed list of details for that request type (§4.5). The exact rules are in the Orchestrator prompt ([Appendix](#appendix-system-prompts)).
 
 Results on the four vague tests:
 
@@ -348,22 +353,22 @@ Results on the four vague tests:
 
 ### 6.3 Date rules
 
-- `AS_OF_DATE = 2026-04-28`, `PROJECT_START = 2026-03-30` (Week 1 Monday).
-- Phase dates: start = `PROJECT_START + (start_week−1) weeks`; end = `PROJECT_START + (end_week−1) weeks + 6 days`.
-- **Overdue:** status ≠ Done and `due_date < AS_OF_DATE`.
-- **Due soon / at risk:** status ≠ Done and `AS_OF_DATE ≤ due_date ≤ AS_OF_DATE + 7 days`.
-- **Blocked:** status = Blocked (always flagged, regardless of date).
+- **Reference dates:** the as-of date is 2026-04-28; the project starts on 2026-03-30 (the Monday of Week 1). Both are in `mira_config.json`.
+- **Phase dates:** a phase starts on the Monday of its first week and ends on the Sunday of its last week.
+- **Overdue:** not Done, and the due date is before the as-of date.
+- **Due soon / at risk:** not Done, and due between the as-of date and 7 days after it.
+- **Blocked:** status is Blocked. Always flagged, whatever the date.
 
 ### 6.4 Risk register, mitigation coverage and ranking
 
-The risk register (`project_risks_mira.csv`) has no likelihood/severity scores, so the assistant uses **live evidence from the task board**. Each risk lists its **mitigation tasks**: the work the team is doing to reduce that risk. This mirrors real practice, where a risk register links each risk to its mitigation actions and their tickets.
+The risk register (`project_risks_mira.csv`) has no likelihood/severity scores, so the assistant uses live evidence from the task board. Each risk lists its mitigation tasks: the work the team is doing to reduce that risk. This mirrors real practice, where a risk register links each risk to its mitigation actions and their tickets.
 
 **Code decides, not the LLM.** The `get_risks` tool (Mira Tools, Code node) computes every signal, coverage status, tier and rank. The Risk agent and Planner only explain the result. Why:
 - **Consistent:** the same data always gives the same answer. An LLM could rank differently on each run.
 - **Explainable:** every result traces back to a named task and date.
 - **Testable:** T7 and T13 each have one correct answer.
 
-**Mitigation links I added** (in `mira_config.json` → `risk_mitigation`, maintained by the PM, not in code; the original `project_risks_mira.csv` is unchanged):
+**Mitigation links I added** (in the `risk_mitigation` section of `mira_config.json`, maintained by the PM, not in code; the original `project_risks_mira.csv` is unchanged):
 
 | Field | Example | Meaning |
 |---|---|---|
@@ -398,12 +403,12 @@ The risk register (`project_risks_mira.csv`) has no likelihood/severity scores, 
 
 | Status | Rule |
 |---|---|
-| **No mitigation** | No tasks linked |
-| **Weak coverage** | Only weak links |
-| **Mitigation at risk** | A strong-linked task is blocked or overdue |
-| **Covered, on track** | Strong link(s), none blocked or overdue |
+| No mitigation | No tasks linked |
+| Weak coverage | Only weak links |
+| Mitigation at risk | A strong-linked task is blocked or overdue |
+| Covered, on track | Strong link(s), none blocked or overdue |
 
-**Tiers** (for "top N risks"). **Only strong links can raise a tier.** Weak links are shown as context:
+**Tiers** (for "top N risks"). Only strong links can raise a tier. Weak links are shown as context:
 1. **Tier 1 — active signal:** a strong-linked task is Blocked or overdue.
 2. **Tier 2 — emerging signal:** a strong-linked task is In Progress and due now or soon.
 3. **Tier 3 — no current signal.**
@@ -418,7 +423,7 @@ The risk register (`project_risks_mira.csv`) has no likelihood/severity scores, 
 
 ### 6.5 Output templates (abridged)
 
-The output format is set in each agent's prompt, in its **OUTPUT** section ([Appendix](#appendix-system-prompts)). The agent must follow it every time (FR12). In short, each output's sections, in order:
+The output format is set in each agent's prompt, in its OUTPUT section ([Appendix](#appendix-system-prompts)). The agent must follow it every time (FR12). In short, each output's sections, in order:
 - **Plan:** Overview, Goals (quoted from the description), Phases table (phase, weeks, dates, activities, milestones/deliverables), Key risks (IDs), Open questions.
 - **Risk matrix:** table (ID, category, risk, impact, mitigation, live signal, tier), then a summary.
 - **Mitigation coverage:** table (risk ID, risk, mitigation tasks, link strength, coverage status), then a summary grouped by coverage status.
@@ -433,29 +438,29 @@ The output format is set in each agent's prompt, in its **OUTPUT** section ([App
 
 ### 6.6 Human-in-the-loop
 
-The **Stakeholder agent (extended capability)** never sends an email on its own.
+The Stakeholder agent (extended capability) never sends an email on its own.
 
-1. Mira main replies in chat with the draft and hands it to the **Mira Stakeholder Approval** workflow without waiting. That workflow posts the draft to the PM in Slack using n8n's **"Send and Wait for Response"** node (approval type), with **Approve** and **Decline** buttons, and pauses until the PM clicks one.
-2. **Approve** → the email is sent (Gmail node).
-3. **Decline** → the approval workflow asks the PM in Slack what to change. The PM replies with feedback, a **Redraft** step (one LLM call that edits the existing draft; no tools, so it can't add new facts) applies it, and the new draft goes back for approval.
-4. **Guard ("Real draft" If node, first step of the approval workflow):** the draft goes to Slack only if it is a real email (it does not start with "UNKNOWN", the reply when no sprint is named, T17) **and** the request did not come from an evaluation run (`source` ≠ "eval"). So eval runs never post to Slack or send email. (Found and fixed during evaluation: the `source` field had not been published in this workflow, so eval runs posted approval requests to Slack. None were approved; see the change log.)
-5. **Evaluated by:** T12 (Sprint 2 email: right tasks, overdue T006 with a plan to close it, no other sprints) and T17 (no sprint named → asks which sprint, no draft).
+1. Mira main replies in chat with the draft and hands it to the Mira Stakeholder Approval workflow without waiting. That workflow posts the draft to the PM in Slack using n8n's "Send and Wait for Response" node (approval type), with Approve and Decline buttons, and pauses until the PM clicks one.
+2. **Approve:** Gmail sends the email.
+3. **Decline:** the approval workflow asks the PM in Slack what to change. The PM replies with feedback, a Redraft step (one LLM call that edits the existing draft; no tools, so it can't add new facts) applies it, and the new draft goes back for approval.
+4. **Guard ("Real draft" If node, first step of the approval workflow):** the draft goes to Slack only if it is a real email (it does not start with "UNKNOWN", the reply when no sprint is named, T17) and the request did not come from an evaluation run (its source is not "eval"). So eval runs never post to Slack or send email. (Found and fixed during evaluation: the `source` field had not been published in this workflow, so eval runs posted approval requests to Slack. None were approved; see the change log.)
+5. **Evaluated by:** T12 (Sprint 2 email: right tasks, overdue T006 with a plan to close it, no other sprints) and T17 (no sprint named, so it asks which sprint and writes no draft).
 
 Plans are marked "DRAFT — PM review required."
 
 ### 6.7 Scheduled weekly report
 
-1. A **Schedule Trigger** fires every **Monday at 09:00**.
+1. A Schedule Trigger fires every Monday at 09:00.
 2. It creates the fixed request *"Generate the weekly status report for the current sprint using the task board."* (the current sprint comes from `mira_config.json`).
 3. **Normalize request** gives both triggers the same shape: `message`, `session_id`, `source` (`chat`, `schedule` or `eval`). All downstream nodes read the message from here, not from a trigger.
-4. The request goes through the **same flow** as chat: Orchestrator → Status agent → Mira Save Doc.
-5. **Delivery depends on the source:** chat → reply in chat with the Doc link; schedule → post a 3-line summary + Doc link to the Slack channel `#mira-reports`.
+4. The request goes through the same flow as chat: the Orchestrator, then the Status agent, then Mira Save Doc.
+5. **Delivery depends on the source:** a chat request gets a chat reply with the Doc link; the Monday run posts a 3-line summary + Doc link to the Slack channel `#mira-reports`.
 6. Not part of the 17 evaluation tests. Checked once by hand (run the schedule manually) and screenshotted for the write-up.
 
 ## 7. Assumptions and known data issues
 
 **Assumptions**
-- `AS_OF_DATE = 2026-04-28` (end of Sprint 3) and `PROJECT_START = 2026-03-30` (Week 1 Monday).
+- The as-of date is 2026-04-28 (end of Sprint 3), and the project starts on 2026-03-30 (the Monday of Week 1).
 - The original resource files (`project_description.txt`, `project_timeline_mira.csv`, `project_risks_mira.csv`, `sample_task_board_mira.csv`) are the source of truth and are read unchanged. Where the problem statement and a CSV differ (e.g. Done count), the CSV wins.
 - The reference dates and mitigation links are my own assumptions, kept in `mira_config.json`.
 - One OpenAI API key is available (gpt-4o-mini and gpt-4o for the agents, gpt-4.1 for the judges).
@@ -465,7 +470,7 @@ Plans are marked "DRAFT — PM review required."
 | Issue | Handling |
 |---|---|
 | Problem statement says "3 Done"; CSV has 5 Done (T001–T005) | CSV is source of truth; ground truth uses 5 / 3 / 1 / 16 |
-| No current date in data | Fixed `AS_OF_DATE` |
+| No current date in data | A fixed as-of date (2026-04-28) in `mira_config.json` |
 | Risk CSV has no likelihood/severity | Evidence-based ranking rule (§6.4) |
 | Task board ends 2026-08-04 (T023, Sprint 10); timeline Phase 8 ends 2026-09-13 | Not resolved; documented here only |
 | Phase 2 milestone "Gap analysis report" due 2026-04-26 but T006 still In Progress | T006 is flagged as an overdue task; milestones are listed by date only (§6.4) |
