@@ -169,7 +169,7 @@ Questions about blocked tasks and upcoming milestones (T8, T11) are handled by t
 
 This is what keeps the assistant grounded: numbers and dates come from code, words come from the LLM.
 
-All six tools live in one n8n workflow, "Mira Tools". Each agent attaches one Call n8n Workflow Tool node per tool, all pointing at Mira Tools with a different tool name. Inside, a Switch sends the request to that tool's branch, which computes in a Code node and returns JSON. Before the Switch, one load-data block downloads all 5 files from Google Drive and parses them with the Extract from File node (each CSV into rows, the text file into text, the config into an object), on every call (see §5.2, "Which files does each tool call load?").
+All six tools live in one n8n workflow, "Mira Tools". Each agent attaches one Call n8n Workflow Tool node per tool, all pointing at Mira Tools with a different tool name. Inside, a Switch sends the request to that tool's branch, which computes in a Code node and returns JSON. Before the Switch, one load-data block downloads all 5 files from Google Drive and parses them with the Extract from File node (each CSV into rows, the text file into text, the config into an object), on every call (see §5.2, "Does each tool load only the files it needs?").
 
 | Tool | Parameters | Returns |
 |---|---|---|
@@ -324,7 +324,11 @@ I chose this over n8n's Text Classifier node followed by a separate sufficiency 
 
 **Tools and data loading**
 
-**Which files does each tool call load?** All 5 files, every time. The alternative is to load only the files each tool needs. That means fewer downloads and a slightly faster run, but every tool would need its own download steps. Loading everything at the start of Mira Tools is simpler: there is one set of download steps, and each tool is just a Code node. The files are tiny (about 10 KB in all), so the cost is small: about 15 Drive downloads per request (3 tool calls × 5 files), likely 1–3 s extra, and no extra LLM cost. At scale this would change for the task board. It would come from a task tool's API (for example Jira, Azure DevOps or Notion), and a real board holds hundreds of tasks. Then the task tools should ask the board for only the tasks they need, while the other 4 files stay small and can still load every time.
+**Does each tool load only the files it needs?** No. Every tool call loads all 5 files. The 10 nodes at the start of Mira Tools download and parse each file into JSON. n8n keeps that JSON in memory for the length of the run, and each tool's Code node reads only the parts it needs (for example, Return tasks reads the parsed task rows). When the run ends the memory is cleared, so every tool call loads the files again.
+
+Loading only the needed files would mean fewer downloads and a slightly faster run, but every tool would need its own download steps. Loading everything up front is simpler: there is one set of download steps, and each tool is just a Code node. The files are tiny (about 10 KB in all), so the cost is small: about 15 Drive downloads per request (3 tool calls × 5 files), likely 1–3 s extra, and no extra LLM cost.
+
+At scale this would change for the task board. It would come from a task tool's API (for example Jira, Azure DevOps or Notion), and a real board holds hundreds of tasks. Then the task tools should ask the board for only the tasks they need. The other 4 files stay small and can still load every time.
 
 ## 6. Solution design details
 
