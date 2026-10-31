@@ -90,16 +90,16 @@ What the assistant must do, grouped by agent or job. Tests lists the tests that 
 
 ## 3. Non-functional requirements
 
-| ID | Category | Requirement |
+| Category | Requirement | ID |
 |---|---|---|
-| NFR1 | Grounding | 0 fabricated IDs; all numbers come from tools, not from LLM arithmetic |
-| NFR2 | Latency | No target set. Time per request in n8n executions: 4 s for a clarifying reply (T4), 11 s for top 3 risks (T7), 23 s for a risk assessment (T3), 31 s for a full plan (T1). Longer requests write more text and save a Google Doc. |
-| NFR3 | Cost | < US$0.01 per request (met for plan and email, ≈ $0.001; risk and status ≈ $0.011 after the gpt-4o upgrade) |
-| NFR4 | Observability | 100% of LLM and tool calls traced, with tokens, cost, latency and a test ID tag (tokens and cost are estimates; actual cost from OpenAI usage) |
-| NFR5 | Privacy | Least-data principle: each agent can reach only its own data tools; no customer PII in prompts; vendor no-training API terms |
-| NFR6 | Reliability | Graceful error message if a tool fails *(not built yet; a next step in README §4)* |
-| NFR7 | Consistency | Fixed Markdown templates per artifact type |
-| NFR8 | Portability | Workflows exportable as JSON; prompts stored in the repo |
+| Grounding | Invent no task, risk or milestone IDs; take every number from the tools, never from LLM arithmetic | NFR1 |
+| Latency | No target set. Measured per request in n8n: 4 s clarifying reply (T4), 11 s top 3 risks (T7), 23 s risk assessment (T3), 31 s full plan (T1) | NFR2 |
+| Cost | Keep each request under US$0.01 (met for plan and email, ≈ $0.001; risk and status ≈ $0.011 after the gpt-4o upgrade) | NFR3 |
+| Observability | Trace every request in Langfuse, with tokens, cost, latency and the test ID (tokens and cost are estimates; actual cost from OpenAI usage) | NFR4 |
+| Privacy | Give each agent only its own data tools; send no customer PII in prompts; use the API under no-training terms | NFR5 |
+| Reliability | Reply with a clear error message if a tool fails *(not built yet; a next step in README §4)* | NFR6 |
+| Consistency | Follow the fixed output format set in each agent's prompt (§6.5) | NFR7 |
+| Portability | Export every workflow as JSON and store every prompt in the repo | NFR8 |
 
 ## 4. Architecture
 
