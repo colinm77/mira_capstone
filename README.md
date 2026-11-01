@@ -581,7 +581,7 @@ I took Mira from 7/17 to 17/17 by making one change at a time, re-running all 17
 Next, I would:
 
 **Answer quality**
-1. Stop the Stakeholder agent from inventing why a task is late. In T12 it wrote that T006 was overdue "due to ongoing analysis challenges", which isn't in the data. Only the gpt-5.6-luna judge caught this.
+1. Stop the Stakeholder agent from inventing why a task is late. In T12 it wrote that T006 was overdue "due to ongoing analysis challenges", which isn't in the data. Only the gpt-5.6-luna judge caught this. I would add a prompt rule to state only the task's status and days overdue and ask the owner for the cause, and add a T12 criterion that fails any reason not in the data.
 
 **Evaluation and judging**
 1. Add a hold-out test set, since the judge and the fixes were tuned on the same 17 tests
