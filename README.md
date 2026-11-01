@@ -37,7 +37,7 @@ I evaluated Mira in n8n. An evaluation workflow runs each test through Mira, sco
 
 *Plan groundedness covers the plan tests (T1, T2, T9, T14). The Groundedness judge also scores the other tests. There a few score just under 1.0 (0.80–0.95, still a pass): T5 and T8 for the health rating and suggested actions they are asked to give, and T11 for answering "Owner: UNKNOWN" when the data has no owner. These are requested judgements or honest gaps, not invented facts.*
 
-**Evaluation was the main cost.** gpt-4.1 judging was 83% of the day's spend ($2.87 of $3.47), because I re-ran all 17 tests after every change, about 28 runs' worth on that day alone. PMs using Mira never pay this cost. Details: [§2.6](#26-cost-and-evaluation-strategy).
+**Evaluation was the main cost.** gpt-4.1 judging was 83% of the day's spend ($2.87 of $3.47), because I re-ran all 17 tests after every change, about 28 runs' worth on that day alone. PMs using Mira never pay this cost. Details: [§2.6](#26-cost-analysis-and-evaluation-strategy).
 
 **AI assistance.** I used AI (Claude Opus 5.5) as a coding and writing assistant. It wrote the JavaScript in all the n8n Code nodes and the agent and judge prompts, following my guidelines, helped build the answer key ([03 Ground truth](docs/03_ground_truth.md)) and helped draft these docs. I made the design decisions, built and connected the workflows in n8n, tested everything and gave the final verdict on every test.
 
@@ -477,9 +477,9 @@ Then I froze Mira and ran the full 17-test set **three times**. Even at Sampling
 
 Per-test outputs, scores and human notes: [baseline-v1/](baseline-v1/) and [final-v1/](final-v1/) (CSV plus a readable HTML review page per run). Every change between them, with its evidence and result: [change log](docs/06_change_log.md).
 
-### 2.6 Cost and evaluation strategy
+### 2.6 Cost analysis and evaluation strategy
 
-The 3 metrics are defined in [§2.5](#25-baseline-testing-and-results). The Correctness judge grades each test against fixed, numbered criteria and quotes evidence for each item ([doc 05 A4](docs/05_metric_implementation_and_cost.md)).
+**Evaluation strategy:** I re-ran all 17 tests after every change, one change at a time, so I could tell what each change did. Two LLM judges score each answer: Groundedness against the tool results, Correctness against fixed, numbered criteria with evidence quotes ([doc 05 A4](docs/05_metric_implementation_and_cost.md)). The 3 metrics are defined in [§2.5](#25-baseline-testing-and-results). I review every test, and my verdict is final. The release was frozen after 3 final runs that all passed 17/17. That re-running is also why judging was most of my spend (below).
 
 For cost, I used actual token counts from the OpenAI usage export, not Langfuse's estimates:
 
