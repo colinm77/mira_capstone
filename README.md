@@ -445,6 +445,8 @@ Then I froze Mira and ran the full 17-test set **three times**. Even at Sampling
 | **Status accuracy** (≥ 0.9, T10 = 1.0) | 0.67 | 1.00 | 1.00 | 1.00 |
 | Judge agreement with human | 59% | 94% | 94% | 100% |
 
+*Baseline metrics are from re-judging the baseline answers with the final judge (tab `baseline-v1-rejudged-v5`), so they compare like for like with the final runs. The original judge scored them higher (Risk 0.80, Status 0.83), because it passed answers that were missing required items. The 59% agreement is the original judge's.*
+
 📄 **Quick read:** [final-1](final-v1/final-1.html) · [final-2](final-v1/final-2.html) · [final-3](final-v1/final-3.html): one page per run with each test's input, expected answer, Mira's output, judge scores and reasons, and my final verdict. Download and open in a browser; GitHub shows HTML as code.
 
 #### Results sheet: summary tab
