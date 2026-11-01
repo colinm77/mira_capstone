@@ -1,5 +1,7 @@
 # Mira: AI-Powered Project Intelligence Assistant
 
+**Author:** Colin McGregor
+
 ## 0. Mira at a glance
 
 For the capstone of *Applied Agentic AI for PMs/TPMs*, I chose **Mira** from the four options (CalendarMate, Mira, PRD Genie, SalesGenie). Mira is an assistant that helps Nexora's PMs/TPMs plan projects, assess risks and report status, using the data of the **ABCDE Ltd AI Adoption Project**.
