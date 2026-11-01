@@ -415,7 +415,9 @@ I ran all evaluation in n8n and kept the results in a Google Sheet. The **Mira �
 
 📊 **Evaluation results sheet:** [Mira Eval Dataset](https://docs.google.com/spreadsheets/d/1s5ycENt8-rFJuF1IEpWRB79vfeizXutrNx4_s-dDzVc/edit?usp=sharing) (view only, live) · frozen copy: [final-v1/mira_eval_results.xlsx](final-v1/mira_eval_results.xlsx)
 
-The 12 brief tests come from the assignment's *Baseline Test Dataset for Core Capabilities*. I expanded each "Expected Output Must Contain" note into a full expected answer and a checklist for the judge (see [03 Ground truth](docs/03_ground_truth.md)). I used Claude Opus 5.5 to help build the answer key; I reviewed every answer myself.
+The 12 brief tests come from the assignment's *Baseline Test Dataset for Core Capabilities*, and I used their inputs word for word. The brief gives each test only a short "Expected Output Must Contain" note. I expanded each note into a full expected answer with the exact facts from the data, then turned that answer into a numbered checklist (the criteria) for the judge ([03 Ground truth](docs/03_ground_truth.md)). I used Claude Opus 5.5 to help build this answer key, and I reviewed every answer myself.
+
+**Why criteria as well as the expected answer:** when the judge (gpt-4.1) compared answers to the expected answer alone, its grading swung between too lenient and too strict from one version to the next ([change log](docs/06_change_log.md) CHG-01c). The checklist says exactly what must be in the answer, so a score means the same thing on every run. The expected answer is still used to check facts. A stronger, reasoning judge might grade reliably against the expected answer alone. The side test with gpt-5.6-luna (§4) points that way, but I didn't test it without criteria.
 
 I added 5 more tests (T13–T17) so every agent was tested on its hardest case, usually data that doesn't exist:
 
