@@ -316,7 +316,7 @@ Every Monday at 09:00, the **Every Monday 9am** trigger sends a fixed request ("
 
 For the extended capability I chose stakeholder update emails, with a PM approval step built in. Emails go to people outside the team, so a PM must review each one before it is sent. The Stakeholder agent drafts a sprint update covering only that sprint's tasks. It flags anything overdue or blocked, with a plan to close it.
 
-Mira never sends on its own. The draft goes to the PM in Slack with **Approve** and **Decline** buttons. Approve sends it through Gmail. Decline asks what to change, and Mira redrafts without adding new facts, then asks again. Evaluation runs skip Slack entirely. In my runs, Gmail sent each approved email to my own inbox (screenshots below). For privacy, the recipient in the published export is replaced with `pm@example.com`. Tested by T12 (Sprint 2 email) and T17 (no sprint named, so Mira asks which one). Details: [PRD §6.6](docs/02_prd.md#66-human-in-the-loop).
+Mira never sends on its own. The draft goes to the PM in Slack with **Approve** and **Decline** buttons. Approve sends it through Gmail. Decline asks what to change, and Mira redrafts without adding new facts, then asks again. Evaluation runs skip Slack entirely. In my runs, Gmail sent each approved email to my own inbox (screenshots below). For privacy, the recipient in the published export is replaced with `pm@example.com`. Tested by T12 (Sprint 2 email) and T17 (no sprint named, so Mira asks which one). The brief also asks for updates tailored to leadership, engineering and client audiences. The prompt sets the tone for leadership (short, outcome-focused) and engineering (task detail), but has no rule for a client audience. No test checks the three versions. Details: [PRD §6.6](docs/02_prd.md#66-human-in-the-loop).
 
 #### Approve flow (T12)
 
@@ -587,7 +587,7 @@ Next, I would:
 1. add a hold-out test set, since the judge and the fixes were tuned on the same 17 tests
 2. add a code check that flags any task or risk ID in an answer that isn't in the data, to back up the LLM judge
 3. swap in gpt-5.6-luna as the judge for both Groundedness and Correctness. In the side test it gave better reasons and caught an error gpt-4.1 missed
-4. add at least two more stakeholder email tests (e.g. another audience, a sprint with no overdue work) and give the email capability its own metric
+4. add a client tone rule to the Stakeholder prompt, then add tests for a leadership, an engineering and a client email on the same sprint, so the three versions can be compared. Give the email capability its own metric
 5. make the T13 criteria clearer, so the answer must say which mitigation task is blocked and which is overdue
 
 **Reliability**
@@ -628,6 +628,7 @@ Human approval stays on for every client-facing message in all stages.
 - The cost is measured on one day of usage.
 - The data files must keep a fixed format (column names, date format). There is no schema check yet.
 - The Stakeholder redraft step (after Decline) is not evaluated. It follows the PM's feedback, so feedback that names something outside the sprint can bring it into the redraft. The PM's approval is the safeguard.
+- Tailoring by audience is untested. The Stakeholder prompt has tone rules for leadership and engineering but none for a client. T12 names no audience, and T17 names no sprint, so no test produces an email for a specific audience.
 
 ---
 
