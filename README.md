@@ -106,7 +106,7 @@ flowchart TD
 
 Each request Mira gets is one type: a plan, a risk question, a status report or an email. So I chose a **router**. One Orchestrator call decides the type and whether there is enough information, and one specialist agent answers. That is cheaper, easier to test and easier to trace than agents calling each other.
 
-At first the Orchestrator made every routing decision itself. During evaluation, fixing one routing case in its prompt kept breaking another, so I moved two decisions into code. A request that names the active project always goes through, since Mira has its data. A vague request gets a fixed list of clarifying questions. Details: [PRD §4.5](docs/02_prd.md).
+At first the Orchestrator made every routing decision itself. During evaluation, fixing one routing case in its prompt kept breaking another, so I moved two decisions into code. A request that names the active project always goes through, since Mira has its data. A vague request gets a fixed list of clarifying questions. Details: [PRD §4.5](docs/02_prd.md#45-orchestration-pattern-and-rationale).
 
 #### Source data
 
@@ -572,34 +572,34 @@ Full charter: [docs/01_project_charter_brd.md](docs/01_project_charter_brd.md).
 ### Improvement plan
 
 I took Mira from 7/17 to 17/17 by making one change at a time, re-running all 17 tests and logging each result ([change log](docs/06_change_log.md)). I:
-- **moved** two routing decisions from the Orchestrator prompt into code
-- **upgraded** the Risk and Status agents to gpt-4o
-- **connected** the `get_overdue_or_blocked` tool to the Stakeholder agent
-- **set** Sampling Temperature 0 on every model
-- **rebuilt** the Correctness judge so its scores could be trusted
+- Moved two routing decisions from the Orchestrator prompt into code: a request that names the active project always goes through, and a vague request gets a fixed list of clarifying questions ([PRD §4.5](docs/02_prd.md#45-orchestration-pattern-and-rationale))
+- Upgraded the Risk and Status agents to gpt-4o
+- Connected the `get_overdue_or_blocked` tool to the Stakeholder agent
+- Set Sampling Temperature 0 on every model
+- Rebuilt the Correctness judge so its scores could be trusted
 
 Next, I would:
 
 **Answer quality**
-1. stop the Stakeholder agent from giving reasons that aren't in the data (T12)
+1. Stop the Stakeholder agent from inventing why a task is late. In T12 it wrote that T006 was overdue "due to ongoing analysis challenges", which isn't in the data. Only the gpt-5.6-luna judge caught this.
 
 **Evaluation and judging**
-1. add a hold-out test set, since the judge and the fixes were tuned on the same 17 tests
-2. add a code check that flags any task or risk ID in an answer that isn't in the data, to back up the LLM judge
-3. swap in gpt-5.6-luna as the judge for both Groundedness and Correctness. In the side test it gave better reasons and caught an error gpt-4.1 missed
-4. add a client tone rule to the Stakeholder prompt, then add tests for a leadership, an engineering and a client email on the same sprint, so the three versions can be compared. Give the email capability its own metric
-5. make the T13 criteria clearer, so the answer must say which mitigation task is blocked and which is overdue
+1. Add a hold-out test set, since the judge and the fixes were tuned on the same 17 tests
+2. Add a code check that flags any task or risk ID in an answer that isn't in the data, to back up the LLM judge
+3. Swap in gpt-5.6-luna as the judge for both Groundedness and Correctness. In the side test it gave better reasons and caught an error gpt-4.1 missed
+4. Add a client tone rule to the Stakeholder prompt, then add tests for a leadership, an engineering and a client email on the same sprint, so the three versions can be compared. Give the email capability its own metric
+5. Make the T13 criteria clearer, so the answer must say which mitigation task is blocked and which is overdue
 
 **Reliability**
-1. add graceful error handling: if a tool, Google Drive or Slack call fails, reply with a clear message instead of stopping silently
+1. Add graceful error handling: if a tool, Google Drive or Slack call fails, reply with a clear message instead of stopping silently
 
 **Cost and speed**
-1. get status and risk requests under the $0.01 target. A full risk assessment costs $0.015 on gpt-4o. Shorter tool results would cut input tokens, or gpt-4o-mini could work again if the tools return ready-made date phrases like "due today"
-2. download the project files once per request in Mira main, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of about 15 today, where each of an agent's 3 tool calls downloads all 5 files. On T1 this would save about 8 s of 30 s
-3. label each call in the Langfuse trace with its real model, so its cost matches the OpenAI bill
+1. Get status and risk requests under the $0.01 target. A full risk assessment costs $0.015 on gpt-4o. Shorter tool results would cut input tokens, or gpt-4o-mini could work again if the tools return ready-made date phrases like "due today"
+2. Download the project files once per request in Mira main, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of about 15 today, where each of an agent's 3 tool calls downloads all 5 files. On T1 this would save about 8 s of 30 s
+3. Label each call in the Langfuse trace with its real model, so its cost matches the OpenAI bill
 
 **New features**
-1. build a Slack chat app so PMs can ask the assistant from Slack instead of the n8n chat. Optionally, add conversation memory for each Slack thread, so follow-up questions like "and what about Sprint 4?" keep the context.
+1. Build a Slack chat app so PMs can ask the assistant from Slack instead of the n8n chat. Optionally, add conversation memory for each Slack thread, so follow-up questions like "and what about Sprint 4?" keep the context.
 
 ### Evaluation and fine-tuning
 The evaluation set, with human verdicts across 3 final runs, is a labelled dataset. I chose **not** to fine-tune: every failure was fixed faster with a prompt, code or a model change, and 17 examples would overfit. Fine-tuning becomes worthwhile after the pilot. PM-corrected outputs, such as emails declined and redrafted in Slack, could train the Stakeholder agent or the Planner, and the same eval workflow would show whether it helps before release.
