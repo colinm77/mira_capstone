@@ -128,7 +128,7 @@ Metric definitions are in [04 Evaluation metrics](04_evaluation_metrics.md).
 
 | Stage | Who | Exit criteria |
 |---|---|---|
-| 0. Build and test (this capstone) | AI TPM (me), 1 project, 17 tests | SC1–SC4 met on the final runs; SC5 met for plan and email, just over for risk and status (≈ $0.011) |
+| 0. Build and test (this capstone) | AI TPM (me), 1 project, 17 tests | SC1–SC4 met on the final runs; SC5 met for plan, email and clarify, over for status ($0.011) and risk ($0.015) |
 | 1. Pilot | 2 PMs, 1 project each, 2 weeks | No critical errors; SC6 ≥ 4/5 |
 | 2. Expand | All 10 PMs/TPMs | Onboarding guide, Slack channel, office hours |
 | 3. Operate | All | Weekly eval re-runs, monthly cost review, feedback backlog |

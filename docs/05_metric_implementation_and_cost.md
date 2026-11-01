@@ -290,7 +290,7 @@ Compare the cost of **vague inputs** (T2, T4, T6, T9) with **detailed inputs**. 
 
 ### B5. Actual cost with the final models (OpenAI usage, 2026-10-27)
 
-Source: OpenAI **Usage** page (Cost by line item) and the token export (`openai_usage/completions_usage_2026-10-27_2026-10-27.csv`), for Mira's API key only. The usage day is in **UTC** (2026-10-27 00:00–24:00 UTC), so it covers the later evaluation runs (run-7 … run-11, final-1, final-2, final-3), earlier runs and judge-only re-runs that fell in that UTC day, and a few editor-chat tests. 942 judge calls ≈ 28 runs of 34 judge calls, so per-run figures below are worked out **per call**, not by dividing the day total. A second API key ("w6 key for langfuse and langflow": 650 gpt-4.1 + 325 gpt-4.1-mini requests, ≈ $0.44 that day) is not in the table. It was used by an **old Langfuse LLM-as-a-judge evaluator** that kept scoring Mira traces ("correctness" in Langfuse). That score is not one of Mira's metrics, and the evaluator is being turned off. Strictly, it is extra evaluation cost, so the day's evaluation-related total is ≈ $3.91.
+Source: OpenAI **Usage** page (Cost by line item) and the token export (`openai_usage/completions_usage_2026-10-27_2026-10-27.csv`), for Mira's API key, leaving out a few calls unrelated to this project. The usage day is in **UTC** (2026-10-27 00:00–24:00 UTC), so it covers the later evaluation runs (run-7 … run-11, final-1, final-2, final-3), earlier runs and judge-only re-runs that fell in that UTC day, and a few editor-chat tests. 942 judge calls ≈ 28 runs of 34 judge calls, so per-run figures below are worked out **per call**, not by dividing the day total. A second API key ("w6 key for langfuse and langflow": 650 gpt-4.1 + 325 gpt-4.1-mini requests, ≈ $0.44 that day) is not in the table. It was used by an **old Langfuse LLM-as-a-judge evaluator** that kept scoring Mira traces ("correctness" in Langfuse). That score is not one of Mira's metrics, and the evaluator is being turned off. Strictly, it is extra evaluation cost, so the day's evaluation-related total is ≈ $3.91.
 
 | Model | Used by | Requests | Input tokens | Output tokens | Cost |
 |---|---|---|---|---|---|
@@ -306,21 +306,26 @@ Source: OpenAI **Usage** page (Cost by line item) and the token export (`openai_
 | gpt-4o | 1,439 / 180 | ≈ $0.0053 |
 | gpt-4o-mini | 1,093 / 103 | ≈ $0.0002 |
 
-**Tokens and cost per request (final Mira)** — an agent request = 1 Orchestrator call + about 2 agent calls (one to call the tools, one to write the answer); built from the per-call averages above (gpt-4.1 judge call ≈ 1,330 in / 95 out):
+**Tokens and cost per request (final Mira), measured in n8n:** one test per request type. Each execution shows every model node's input and output tokens, priced at gpt-4o-mini $0.15 / $0.60 and gpt-4o $2.50 / $10 per million input / output tokens. Each agent's count covers all of its model calls in the request.
 
-| Request | Model calls | Input tokens | Output tokens | Cost |
+| Request (test) | Model calls | Input tokens | Output tokens | Cost |
 |---|---|---|---|---|
-| Clarify reply (vague input) | 1 gpt-4o-mini | ≈ 1,100 | ≈ 100 | < $0.001 |
-| Plan or stakeholder request | 3 gpt-4o-mini | ≈ 3,300 | ≈ 300 | ≈ $0.001 |
-| Risk or Status request | 1 gpt-4o-mini + 2 gpt-4o | ≈ 4,000 | ≈ 460 | ≈ $0.011 |
+| Vague input, clarify (T2) | Orchestrator (gpt-4o-mini) | 833 | 35 | $0.0002 |
+| Stakeholder email (T12) | Orchestrator + Stakeholder (gpt-4o-mini) | 2,750 | 152 | $0.0005 |
+| Plan (T1) | Orchestrator + Planner (gpt-4o-mini) | 3,766 | 676 | $0.0010 |
+| Status report (T5) | Orchestrator (gpt-4o-mini) + Status agent (gpt-4o) | 3,414 | 459 | $0.011 |
+| Risk assessment (T3) | Orchestrator (gpt-4o-mini) + Risk agent (gpt-4o) | 4,126 | 690 | $0.015 |
+
+**Evaluation cost**, built from the per-call averages above (gpt-4.1 judge call ≈ 1,330 in / 95 out):
+
+| | Model calls | Input tokens | Output tokens | Cost |
+|---|---|---|---|---|
 | Judging one test | 2 gpt-4.1 | ≈ 2,660 | ≈ 190 | ≈ $0.006 |
 | One full evaluation run (17 tests) | ≈ 43 Mira calls + 34 judge calls | ≈ 99,000 | ≈ 9,000 | ≈ $0.21 |
-
-These are per-model averages over all calls of the day, so a long plan uses more output tokens than a short answer. Input is mostly the system prompt, tool definitions and tool results. The exact tokens of a single request are in the n8n execution (each OpenAI Chat Model node reports its token usage).
 
 **Findings**
 - A gpt-4o call costs about **23×** a gpt-4o-mini call in practice (more than the 15–17× price ratio), because Risk and Status calls carry larger tool results. In absolute terms the upgrade adds **about 1 cent per Risk or Status request**, which was judged worth the better reasoning (change log CHG-14, CHG-16).
 - **Judging with gpt-4.1 was the largest cost, because we ran the evaluation many times.** One run is cheap. But every change meant re-running and re-judging all 17 tests. On 2026-10-27 we judged about **28 runs' worth** (942 judge calls). That made the judges **≈ $2.87 of the day's ≈ $3.47 (83%)**. For comparison, on the same day gpt-4o cost $0.42 and gpt-4o-mini $0.18. A gpt-4.1 judge call costs ≈ $0.0030 (≈ 1,330 tokens in, 94 out), about 13× a gpt-4o-mini call. Judging one test (2 calls) costs ≈ **$0.006**, and judging one 17-test run (34 calls) ≈ **$0.10**. Judges run only during evaluation and do not affect the cost of using Mira.
 - **One full final evaluation run ≈ $0.21:** judges ≈ $0.10 + Mira ≈ $0.11 (about 19 gpt-4o calls for the 9 Risk/Status tests + about 24 gpt-4o-mini calls). Before the gpt-4o upgrade, Mira's share was about $0.01 per run, so judging was over 90% of each run's cost.
-- **Cost per plan, measured on T1:** Orchestrator 834 in / 25 out, Planner 2,932 in / 651 out (n8n's counts), so $0.00097. That matches the per-call averages above.
+- **Cost per request, measured in n8n:** one test per request type (table above). A full risk assessment ($0.015) is the most expensive request.
 - **Langfuse cost is rough, not the bill.** A Code node can't read the model's token counts during a run, so the Build Langfuse trace node estimates them from text length. The estimate is close (T1: 3,108 vs n8n's 3,098). But the node labels every call as gpt-4o-mini, so risk and status requests, which run on gpt-4o, show far too low a cost. The OpenAI usage numbers above are the actual cost.

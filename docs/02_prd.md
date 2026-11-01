@@ -94,7 +94,7 @@ What the assistant must do, grouped by agent or job. Tests lists the tests that 
 |---|---|---|
 | Grounding | Invent no task, risk or milestone IDs; take every number from the tools, never from LLM arithmetic | NFR1 |
 | Latency | No target set. Measured per request in n8n: 4 s clarifying reply (T4), 11 s top 3 risks (T7), 23 s risk assessment (T3), 31 s full plan (T1) | NFR2 |
-| Cost | Keep each request under US$0.01 (met for plan and email, ≈ $0.001; risk and status ≈ $0.011 after the gpt-4o upgrade) | NFR3 |
+| Cost | Keep each request under US$0.01 (met for plan, email and clarify, $0.001 or less; status $0.011 and risk $0.015 on gpt-4o, measured in n8n) | NFR3 |
 | Observability | Trace every request in Langfuse, with tokens, cost, latency and the test ID (tokens and cost are estimates; actual cost from OpenAI usage) | NFR4 |
 | Privacy | Give each agent only its own data tools; send no customer PII in prompts; use the API under no-training terms | NFR5 |
 | Reliability | Reply with a clear error message if a tool fails *(not built yet; a next step in README §4)* | NFR6 |

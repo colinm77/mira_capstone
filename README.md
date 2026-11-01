@@ -32,7 +32,7 @@ I evaluated Mira in n8n. An evaluation workflow runs each test through Mira, sco
 | Plan groundedness | 1.00 | **1.00** | ≥ 0.95 |
 | Risk relevance | 0.60 | **0.93** | ≥ 0.9 |
 | Status accuracy | 0.67 | **1.00** (T10 = 1.0) | ≥ 0.9, T10 = 1.0 |
-| Cost per request (using Mira) | not measured | **≈ $0.001** (plan, email) · **≈ $0.011** (risk, status) | < $0.01 |
+| Cost per request (using Mira) | not measured | $0.001 plan · $0.0005 email · $0.011 status · $0.015 risk (measured in n8n) | < $0.01 |
 | Cost per evaluation run (17 tests) | not measured | **≈ $0.21**: gpt-4.1 judges ≈ $0.10 + Mira ≈ $0.11 | — |
 
 *Plan groundedness covers the plan tests (T1, T2, T9, T14). The Groundedness judge also scores the other tests. There a few score just under 1.0 (0.80–0.95, still a pass): T5 and T8 for the health rating and suggested actions they are asked to give, and T11 for answering "Owner: UNKNOWN" when the data has no owner. These are requested judgements or honest gaps, not invented facts.*
@@ -481,31 +481,49 @@ Per-test outputs, scores and human notes: [baseline-v1/](baseline-v1/) and [fina
 
 **Evaluation strategy:** I re-ran all 17 tests after every change, one change at a time, so I could tell what each change did. Two LLM judges score each answer: Groundedness against the tool results, Correctness against fixed, numbered criteria with evidence quotes ([doc 05 A4](docs/05_metric_implementation_and_cost.md)). The 3 metrics are defined in [§2.5](#25-baseline-testing-and-results). I review every test, and my verdict is final. The release was frozen after 3 final runs that all passed 17/17. That re-running is also why judging was most of my spend (below).
 
-For cost, I used actual token counts from the OpenAI usage export, not Langfuse's estimates:
+**Where the cost numbers come from:** OpenAI usage is the source of truth, since it's what I was actually billed. I used two sources and checked one against the other:
+- **n8n token counts:** the cost of each request type, measured in one test per type (table below).
+- **OpenAI usage for 2026-10-27:** the actual bill, the cost per model call and the evaluation cost. The files are the token export [openai_usage/completions_usage_2026-10-27_2026-10-27.csv](openai_usage/completions_usage_2026-10-27_2026-10-27.csv) and a screenshot of the usage page's cost by line item, [screenshots/cost_openai_usage.png](screenshots/cost_openai_usage.png) (below).
 
-| Model | Used by | Input tokens per call | Output tokens per call | Cost per call |
+Langfuse's cost is only rough ([§2.4](#24-observability)), so I didn't use it.
+
+**Cost per request, measured in n8n:** each n8n execution shows the input and output tokens of every model node. I read them for one test of each request type, and priced them at OpenAI's rates: gpt-4o-mini at $0.15 per million input tokens and $0.60 per million output, gpt-4o at $2.50 and $10. Each agent's count covers all of its model calls in the request. n8n marks its counts with ~ as approximate, and they line up with the OpenAI averages below.
+
+| Request (test) | Model calls | Input tokens | Output tokens | Cost |
 |---|---|---|---|---|
-| gpt-4o-mini | Orchestrator, Planner, Stakeholder | ≈ 1,090 | ≈ 100 | ≈ $0.0002 |
-| gpt-4o | Risk, Status | ≈ 1,440 | ≈ 180 | ≈ $0.0053 |
-| gpt-4.1 | Groundedness and Correctness judges | ≈ 1,330 | ≈ 95 | ≈ $0.0030 |
+| Vague input, clarify (T2) | Orchestrator (gpt-4o-mini) | 833 | 35 | $0.0002 |
+| Stakeholder email (T12) | Orchestrator + Stakeholder (gpt-4o-mini) | 2,750 | 152 | $0.0005 |
+| Plan (T1) | Orchestrator + Planner (gpt-4o-mini) | 3,766 | 676 | $0.0010 |
+| Status report (T5) | Orchestrator (gpt-4o-mini) + Status agent (gpt-4o) | 3,414 | 459 | $0.011 |
+| Risk assessment (T3) | Orchestrator (gpt-4o-mini) + Risk agent (gpt-4o) | 4,126 | 690 | $0.015 |
 
-**Per request** (an agent request = 1 Orchestrator call + about 2 agent calls: one to call the tools, one to write the answer):
+Cost per plan is $0.001. Clarify, email and plan requests meet the < $0.01 target. A status report is just over, and a full risk assessment is 50% over. Almost all of that is gpt-4o. I moved the Risk and Status agents to it because gpt-4o-mini got dates and summaries wrong (CHG-14, CHG-16), and I accepted the extra 1 to 1.5 cents for correct answers.
 
-| Request | Model calls | Input tokens | Output tokens | Cost |
+<details>
+<summary>Screenshot: T1 token counts in n8n</summary>
+
+![n8n execution log for T1: prompt ~3,766 and completion ~676 tokens, 29.957 s](screenshots/tokens_T1.png)
+
+▲ *The T1 execution in n8n. Hovering over the run total (~4,442 tokens) shows the split: prompt ~3,766, completion ~676.*
+
+</details>
+
+**Checked against the bill:** the OpenAI export gives each model's calls and tokens for the day. Pricing them at the same rates reproduces the bill: $0.17 for gpt-4o-mini, $0.42 for gpt-4o and $2.88 for gpt-4.1, against $0.18, $0.42 and $2.87 on the usage page. The export also has rows from other keys and some calls unrelated to this project, which I left out. Dividing each model's day totals by its number of calls gives the average per call:
+
+| Model | Used by | Calls | Input tokens per call | Output tokens per call | Cost per call |
+|---|---|---|---|---|---|
+| gpt-4o-mini | Orchestrator, Planner, Stakeholder | 771 | ≈ 1,090 | ≈ 100 | ≈ $0.0002 |
+| gpt-4o | Risk, Status | 80 | ≈ 1,440 | ≈ 180 | ≈ $0.0053 |
+| gpt-4.1 | Groundedness and Correctness judges | 942 | ≈ 1,330 | ≈ 95 | ≈ $0.0030 |
+
+**Evaluation cost**, built from those per-call averages:
+
+| | Model calls | Input tokens | Output tokens | Cost |
 |---|---|---|---|---|
-| Clarify reply (vague input) | 1 gpt-4o-mini | ≈ 1,100 | ≈ 100 | < $0.001 |
-| Plan or stakeholder request | 3 gpt-4o-mini | ≈ 3,300 | ≈ 300 | ≈ $0.001 |
-| Risk or status request | 1 gpt-4o-mini + 2 gpt-4o | ≈ 4,000 | ≈ 460 | ≈ $0.011 |
-| **Judging one test** | 2 gpt-4.1 | ≈ 2,660 | ≈ 190 | **≈ $0.006** |
-| **One full evaluation run** (17 tests) | ≈ 43 Mira calls + 34 judge calls | ≈ 99,000 | ≈ 9,000 | **≈ $0.21**: judges ≈ $0.10 + Mira ≈ $0.11 |
+| Judging one test | 2 gpt-4.1 | ≈ 2,660 | ≈ 190 | ≈ $0.006 |
+| One full evaluation run (17 tests) | ≈ 43 Mira calls + 34 judge calls | ≈ 99,000 | ≈ 9,000 | ≈ $0.21: judges ≈ $0.10 + Mira ≈ $0.11 |
 
-*These are averages per model over all calls that day, so a long plan uses more output tokens than a short answer. Input is mostly the system prompt, the tool definitions and the tool results; output is small. The exact tokens of any single request are shown in the n8n execution (each OpenAI Chat Model node reports its token usage).*
-
-**Cost per plan, measured:** the brief asks for cost per plan, so I measured one directly. On T1, n8n's token counts were 834 in and 25 out for the Orchestrator, and 2,932 in and 651 out for the Planner. At gpt-4o-mini prices that's $0.00097, which matches the ≈ $0.001 worked out from the day's averages.
-
-Judging was the bulk of my spend, because I ran the evaluation so many times. One run costs only about $0.21, but every change meant re-judging all 17 tests. On the day of the final runs I judged about **28 runs' worth** (942 calls). That made the gpt-4.1 judges **$2.87 of the day's $3.47 (83%)**; gpt-4o cost $0.42 and gpt-4o-mini $0.18. I accepted this cost because I chose gpt-4.1 as the judge believing it was stronger than the agents it grades. I later learned that, like gpt-4o, it is not a reasoning model, so it wasn't clearly a step up (see the side test in [§4](#what-i-learned-from-the-traces)). The fixed criteria are what made its scores trustworthy. PMs using Mira never pay this cost.
-
-Plan and email requests meet the charter target (< $0.01). Risk and status requests are just over it (about $0.011) since the gpt-4o upgrade. I accepted that trade for correct answers ([doc 05 B5](docs/05_metric_implementation_and_cost.md)).
+Judging was the bulk of my spend, because I ran the evaluation so many times. One run costs only about $0.21, but every change meant re-judging all 17 tests. On the day of the final runs I judged about 28 runs' worth (942 calls). That made the gpt-4.1 judges $2.87 of the day's $3.47 (83%); gpt-4o cost $0.42 and gpt-4o-mini $0.18. I accepted this cost because I chose gpt-4.1 as the judge believing it was stronger than the agents it grades. I later learned that, like gpt-4o, it is not a reasoning model, so it wasn't clearly a step up (see the side test in [§4](#what-i-learned-from-the-traces)). The fixed criteria are what made its scores trustworthy. PMs using Mira never pay this cost.
 
 <details>
 <summary>Screenshot: OpenAI usage for 2026-10-27</summary>
@@ -569,9 +587,10 @@ Next, I would:
 **Reliability**
 1. add graceful error handling: if a tool, Google Drive or Slack call fails, reply with a clear message instead of stopping silently
 
-**Speed and tracing**
-1. download the project files once per request in Mira main, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of about 15 today, where each of an agent's 3 tool calls downloads all 5 files. On T1 this would save about 8 s of 30 s
-2. label each call in the Langfuse trace with its real model, so its cost matches the OpenAI bill
+**Cost and speed**
+1. get status and risk requests under the $0.01 target. A full risk assessment costs $0.015 on gpt-4o. Shorter tool results would cut input tokens, or gpt-4o-mini could work again if the tools return ready-made date phrases like "due today"
+2. download the project files once per request in Mira main, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of about 15 today, where each of an agent's 3 tool calls downloads all 5 files. On T1 this would save about 8 s of 30 s
+3. label each call in the Langfuse trace with its real model, so its cost matches the OpenAI bill
 
 **New features**
 1. build a Slack chat app so PMs can ask the assistant from Slack instead of the n8n chat. Optionally, add conversation memory for each Slack thread, so follow-up questions like "and what about Sprint 4?" keep the context.
@@ -589,7 +608,7 @@ The evaluation set, with human verdicts across 3 final runs, is a labelled datas
 ### Rollout to 10 PMs/TPMs
 | Stage | Who | Exit criteria |
 |---|---|---|
-| 0. Build and test (this capstone) | AI TPM (me), 1 project, 17 tests | SC1–SC4 met ✅; SC5 met for plan and email, just over for risk and status |
+| 0. Build and test (this capstone) | AI TPM (me), 1 project, 17 tests | SC1–SC4 met ✅; SC5 met for plan, email and clarify, over for status ($0.011) and risk ($0.015) |
 | 1. Pilot | 2 PMs, 1 project each, 2 weeks | No critical errors; satisfaction ≥ 4/5 |
 | 2. Expand | All 10 PMs/TPMs | Onboarding guide, Slack channel, office hours |
 | 3. Operate | All | Evaluation re-run on every change (regression gate), monthly cost review, feedback backlog. Measure what the capstone couldn't: time to first draft, emails approved without edits (target ≥ 70%) |
@@ -617,7 +636,8 @@ Human approval stays on for every client-facing message in all stages.
 | [prompts/](prompts/) | Every prompt version (judges, Orchestrator, agents), old versions kept |
 | [data/](data/) | Answer key (`ground_truth.json`), my config, eval dataset, final judge criteria. Every run's results are in the [results xlsx](final-v1/mira_eval_results.xlsx) |
 | [scripts/](scripts/) | `json_to_csv.py` (ground truth → dataset) · `build_review.py` (results → HTML review page) · `extract_workflows.py` (exports → prompts, code, models) |
-| [screenshots/](screenshots/) | Canvases, Mira in action, Slack approval, Langfuse traces |
+| [openai_usage/](openai_usage/) | OpenAI token export for 2026-10-27, the source for the bill check and per-call costs (§2.6) |
+| [screenshots/](screenshots/) | Canvases, Mira in action, Slack approval, Langfuse traces, OpenAI usage |
 
 ## 6. How to run
 
