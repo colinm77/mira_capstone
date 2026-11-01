@@ -581,7 +581,7 @@ I took Mira from 7/17 to 17/17 by making one change at a time, re-running all 17
 Next, I would:
 
 **Answer quality**
-1. Stop the Stakeholder agent from inventing why a task is late. In T12 it wrote that T006 was overdue "due to ongoing analysis challenges", which isn't in the data. Only the gpt-5.6-luna judge caught this. I would add a prompt rule to state only the task's status and days overdue and ask the owner for the cause, and add a T12 criterion that fails any reason not in the data.
+1. Stop the Stakeholder agent from inventing why a task is late. In T12 the agent wrote that T006 was overdue "due to ongoing analysis challenges", which isn't in the data. Only the gpt-5.6-luna judge caught the made-up reason. I would add a prompt rule to state only the task's status and days overdue and ask the owner for the cause, and add a T12 criterion that fails any reason not in the data.
 
 **Evaluation and judging**
 1. Add a hold-out test set, since the judge and the fixes were tuned on the same 17 tests
@@ -594,7 +594,7 @@ Next, I would:
 1. Add graceful error handling: if a tool, Google Drive or Slack call fails, reply with a clear message instead of stopping silently
 
 **Cost and speed**
-1. Test gpt-5.6-luna on the Risk and Status agents. gpt-5.6-luna is a reasoning model that costs less than gpt-4o: $0.20 vs $2.50 per million input tokens and $1.20 vs $10 per million output tokens. With my measured tokens, a risk request would drop from $0.015 to about $0.002 to $0.003, and a status request from $0.011 to about $0.001 to $0.002. The range allows for up to 3× more output tokens from its hidden reasoning. That's about 5 to 9 times cheaper, and about $0.20 to $0.35 per PM per month instead of $1.05. This is estimated, not run. Keep it only if all 17 tests still pass, and check latency. The judge would move up to gpt-6-luna, so it stays stronger than the agents it grades. Then set the cost target as a monthly budget per PM instead of per request.
+1. Test gpt-5.6-luna on the Risk and Status agents. gpt-5.6-luna is a reasoning model that costs less than gpt-4o: $0.20 vs $2.50 per million input tokens and $1.20 vs $10 per million output tokens. With my measured tokens, a risk request would drop from $0.015 to about $0.002 to $0.003, and a status request from $0.011 to about $0.001 to $0.002. The range allows for up to 3× more output tokens from gpt-5.6-luna's hidden reasoning. Risk and status requests would be about 5 to 9 times cheaper, and about $0.20 to $0.35 per PM per month instead of $1.05. These costs are estimated, not run. Keep gpt-5.6-luna only if all 17 tests still pass, and check latency. The judge would move up to gpt-6-luna, so the judge stays stronger than the agents being graded. Then set the cost target as a monthly budget per PM instead of per request.
 2. Download the project files once per request in Mira main, before the agent runs, and pass the parsed data to each tool call. That's 5 downloads per request instead of about 15 today, where each of an agent's 3 tool calls downloads all 5 files. On T1 this would save about 8 s of 30 s
 3. Label each call in the Langfuse trace with its real model, so its cost matches the OpenAI bill
 
