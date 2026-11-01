@@ -364,7 +364,7 @@ Mira never sends on its own. The draft goes to the PM in Slack with **Approve** 
 
 ### 2.4 Observability
 
-I wired Mira to **Langfuse** so I could see how each request was handled: chat, the Monday schedule and eval runs. A trace shows the Orchestrator's routing decision, which agent ran, each tool call, timings and an estimated cost. Eval traces carry the test ID, so I could follow a failing test step by step.
+I wired Mira to **Langfuse** so I could see how each request was handled: chat, the Monday schedule and eval runs. A trace shows the Orchestrator's routing decision, which agent ran, each tool call and an estimated cost. Eval traces carry the test ID, so I could follow a failing test step by step.
 
 Langfuse is for observability only, not evaluation. Scoring happens in n8n, and the results go to the Google Sheet (§2.5). In practice the sheet also showed each test's path next to its scores, so I did most debugging there. One limit: Langfuse's cost figure is rough. The trace estimates tokens from text length, which is close, but it labels every call as gpt-4o-mini, so risk and status requests (gpt-4o) look far too cheap. The actual cost comes from OpenAI usage ([doc 05 B5](docs/05_metric_implementation_and_cost.md)).
 
