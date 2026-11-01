@@ -497,7 +497,7 @@ Langfuse's cost is only rough ([§2.4](#24-observability)), so I didn't use it.
 | Status report (T5) | Orchestrator (gpt-4o-mini) + Status agent (gpt-4o) | 3,414 | 459 | $0.011 |
 | Risk assessment (T3) | Orchestrator (gpt-4o-mini) + Risk agent (gpt-4o) | 4,126 | 690 | $0.015 |
 
-Cost per plan is $0.001. Clarify, email and plan requests meet the < $0.01 target. A status report is just over, and a full risk assessment is 50% over. Almost all of that is gpt-4o. I moved the Risk and Status agents to it because gpt-4o-mini got dates and summaries wrong (CHG-14, CHG-16), and I accepted the extra 1 to 1.5 cents for correct answers.
+Cost per plan is $0.001. Clarify, email and plan requests meet the < $0.01 target. A status report is just over, and a full risk assessment is 50% over. The extra cost comes almost entirely from gpt-4o. I moved the Risk and Status agents from gpt-4o-mini to gpt-4o because gpt-4o-mini got dates and summaries wrong (CHG-14, CHG-16). I accepted the extra 1 to 1.5 cents per request for correct answers.
 
 <details>
 <summary>Screenshot: T1 token counts in n8n</summary>
