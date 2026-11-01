@@ -2,6 +2,8 @@
 
 **Author:** Colin McGregor
 
+*Best viewed on GitHub: [colinm77/mira_capstone](https://github.com/colinm77/mira_capstone). The diagrams, screenshots and collapsible sections render there.*
+
 ## 0. Mira at a glance
 
 For the capstone of *Applied Agentic AI for PMs/TPMs*, I chose **Mira** from the four options (CalendarMate, Mira, PRD Genie, SalesGenie). Mira is an assistant that helps Nexora's PMs/TPMs plan projects, assess risks and report status, using the data of the **ABCDE Ltd AI Adoption Project**.
