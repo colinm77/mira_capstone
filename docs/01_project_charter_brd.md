@@ -90,7 +90,7 @@ Metric definitions are in [04 Evaluation metrics](04_evaluation_metrics.md).
 
 *SC4 raised during the project:* the charter first set 12/12 brief tests and ≥ 90% on extra tests. When I added T13–T17 to cover every agent, I raised it to 17/17.
 
-*SC5 source changed during evaluation:* the charter first named Langfuse traces as the cost source. Langfuse only estimates tokens (from text length) and labels every call with one model, so the actual cost is taken from OpenAI usage instead ([doc 05 B5](05_metric_implementation_and_cost.md), [change log](06_change_log.md)).
+*SC5 source changed during evaluation:* the charter first named Langfuse traces as the cost source. Langfuse only estimates tokens (from text length) and labels every call with one model, so the actual cost is taken from OpenAI usage instead ([doc 05 B2](05_metric_implementation_and_cost.md), [change log](06_change_log.md)).
 
 ## 8. Timeline (build programme)
 

@@ -366,7 +366,7 @@ Mira never sends on its own. The draft goes to the PM in Slack with **Approve** 
 
 I wired Mira to **Langfuse** so I could see how each request was handled: chat, the Monday schedule and eval runs. A trace shows the Orchestrator's routing decision, which agent ran, each tool call and an estimated cost. Eval traces carry the test ID, so I could follow a failing test step by step.
 
-Langfuse is for observability only, not evaluation. Scoring happens in n8n, and the results go to the Google Sheet (§2.5). In practice the sheet also showed each test's path next to its scores, so I did most debugging there. One limit: Langfuse's cost figure is rough. The trace estimates tokens from text length, which is close, but it labels every call as gpt-4o-mini, so risk and status requests (gpt-4o) look far too cheap. The actual cost comes from OpenAI usage ([doc 05 B5](docs/05_metric_implementation_and_cost.md)).
+Langfuse is for observability only, not evaluation. Scoring happens in n8n, and the results go to the Google Sheet (§2.5). In practice the sheet also showed each test's path next to its scores, so I did most debugging there. One limit: Langfuse's cost figure is rough. The trace estimates tokens from text length, which is close, but it labels every call as gpt-4o-mini, so risk and status requests (gpt-4o) look far too cheap. The actual cost comes from OpenAI usage ([doc 05 B2](docs/05_metric_implementation_and_cost.md)).
 
 #### Trace tree (T7)
 
@@ -530,7 +530,7 @@ Judging was the bulk of my spend, because I ran the evaluation so many times. On
 
 ![OpenAI usage, cost by line item, 2026-10-27](screenshots/cost_openai_usage.png)
 
-▲ *OpenAI usage for 2026-10-27, all API keys ($3.92). It includes about $0.44 from an old Langfuse evaluator on a separate key: part of the gpt-4.1 lines, and all of the gpt-4.1-mini lines. Mira's own spend was $3.47 ([doc 05 B5](docs/05_metric_implementation_and_cost.md)).*
+▲ *OpenAI usage for 2026-10-27, all API keys ($3.92). It includes about $0.44 from an old Langfuse evaluator on a separate key: part of the gpt-4.1 lines, and all of the gpt-4.1-mini lines. Mira's own spend was $3.47 ([doc 05 B2](docs/05_metric_implementation_and_cost.md)).*
 
 </details>
 

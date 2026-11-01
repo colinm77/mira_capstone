@@ -47,7 +47,7 @@ The sheet also has the two columns from the capstone playbook (Step 5), "Expecte
 
 ## 5. Cost
 
-Cost isn't a quality metric. It's in README §2.6 and [doc 05 B5](05_metric_implementation_and_cost.md): the cost per request, measured in n8n for one test of each type, and the actual bill from OpenAI usage. Langfuse's cost is only rough, so I didn't use it for cost.
+Cost isn't a quality metric. It's in README §2.6 and [doc 05 B2](05_metric_implementation_and_cost.md): the cost per request, measured in n8n for one test of each type, and the actual bill from OpenAI usage. Langfuse's cost is only rough, so I didn't use it for cost.
 
 ## 6. Watched, not scored
 
